@@ -60,7 +60,7 @@ int searchFile(fileOption *fo, char *searchTerm)
   {
     memset(line, '\0', sizeof(char) * lineMax);
     lineLen = 0;
-    while (ch != '\n')
+    while (ch != '\n' && ch!= EOF)
     {
       // Dynamically allocate memory for line
       if (lineLen >= lineMax)
