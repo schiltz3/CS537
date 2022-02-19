@@ -22,8 +22,6 @@ int main(int argc, char *argv[])
   break;
   default: // Search through all the files
   {
-    printf("Mode = Default: search through all files\n");
-    printf("Search term: %s\n", argv[1]);
     for (i = 2; i < argc; i++)
     {
       fileOption *fo = initFileOption();
