@@ -7,7 +7,7 @@ fileOption *initFileOption()
   return fo;
 }
 
-int getFile(fileOption *fo, char *fileName)
+int openFile(fileOption *fo, char *fileName)
 {
   fo->fileName = fileName;
   fo->fp = fopen(fileName, "r");

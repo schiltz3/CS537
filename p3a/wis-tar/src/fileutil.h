@@ -36,7 +36,7 @@ fileOption *initFileOption();
  * @param fileName name of file
  * @return int -1 = error, 0 = sucess
  */
-int getFile(fileOption *fo, char *fileName);
+int openFile(fileOption *fo, char *fileName);
 
 /**
  * @brief Close the open file and free the memory in the fileOption struct
@@ -65,11 +65,20 @@ int searchFile(fileOption *fo, char *searchTerm);
 int tarFile(fileOption *ft, fileOption *fo);
 
 /**
+ * @brief Create files from a tar file
+ * 
+ * @param ft tar file to explode
+ * @return int -1 = error, 0 = sucess
+ */
+int untarFile(fileOption *ft);
+
+/**
  * @brief check if file has any null pointers or err is set
  *
  * @param fo file pointer to check
  * @return int -1 = error, 0 = sucess
  */
 int validateFileOption(fileOption *fo);
+
 
 #endif

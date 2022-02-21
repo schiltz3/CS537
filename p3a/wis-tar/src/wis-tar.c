@@ -33,7 +33,7 @@ int main(int argc, char *argv[])
     for (i = 2; i < argc; i++)
     {
       fileOption *fo = initFileOption();
-      getFile(fo, argv[i]);
+      openFile(fo, argv[i]);
       tarFile(ft, fo);
       closeFile(fo);
     }

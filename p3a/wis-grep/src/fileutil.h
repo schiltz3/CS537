@@ -32,7 +32,7 @@ fileOption *initFileOption();
  * @param fileName name of file
  * @return int -1 = error, 0 = sucess
  */
-int getFile(fileOption *fo, char *fileName);
+int openFile(fileOption *fo, char *fileName);
 
 /**
  * @brief Close the open file and free the memory in the fileOption struct
