@@ -52,3 +52,5 @@ Mkfile.old
 dkms.conf
 
 p3a/output/
+
+p3a/win-tar/output/
