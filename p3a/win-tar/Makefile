@@ -84,6 +84,7 @@ $(MAIN): $(OBJECTS)
 clean:
 	$(RM) $(OUTPUTMAIN)
 	$(RM) $(call FIXPATH,$(OBJECTS))
+	rm -f tarfile.txt
 	@echo Cleanup complete!
 
 run: all
