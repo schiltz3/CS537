@@ -7,8 +7,7 @@
 CC = gcc
 
 # define any compile-time flags
-CFLAGS	:= -Wall -Wextra -g -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=700
-
+CFLAGS	:= -Wall -Wextra -g -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=700 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify
 #   their path using -Lpath, something like:
@@ -35,9 +34,9 @@ FIXPATH = $(subst /,\,$1)
 RM			:= del /q /f
 MD	:= mkdir
 else
-MAIN	:= wis-untar
-MAIN	:= wis-tar
-MAIN	:= wis-grep
+MAIN1	:= wis-grep
+MAIN2	:= wis-tar
+MAIN3	:= wis-untar
 SOURCEDIRS	:= $(shell find $(SRC) -type d)
 INCLUDEDIRS	:= $(shell find $(INCLUDE) -type d)
 LIBDIRS		:= $(shell find $(LIB) -type d)
@@ -64,17 +63,34 @@ OBJECTS		:= $(SOURCES:.c=.o)
 # deleting dependencies appended to the file from 'make depend'
 #
 
-OUTPUTMAIN	:= $(call FIXPATH,$(OUTPUT)/$(MAIN))
+OUTPUTMAIN1	:= $(call FIXPATH,$(OUTPUT)/$(MAIN1))
+OUTPUTMAIN2	:= $(call FIXPATH,$(OUTPUT)/$(MAIN2))
+OUTPUTMAIN3	:= $(call FIXPATH,$(OUTPUT)/$(MAIN2))
 
-all: $(OUTPUT) $(MAIN)
+all: $(OUTPUT) $(MAIN1) $(MAIN2) $(MAIN3)
 	@echo Executing 'all' complete!
 
 $(OUTPUT):
 	$(MD) $(OUTPUT)
 
-$(MAIN): $(OBJECTS) 
-	$(CC) $(CFLAGS) $(INCLUDES) -o $(OUTPUTMAIN) $(OBJECTS) $(LFLAGS) $(LIBS)
+$(MAIN1): wis-grep.o fileutil.o
+	$(CC) $(CFLAGS) -o $(OUTPUTMAIN1) $(SOURCEDIRS)/wis-grep.o $(SOURCEDIRS)/fileutil.o
+$(MAIN2): wis-tar.o fileutil.o
+	$(CC) $(CFLAGS) -o $(OUTPUTMAIN2) $(SOURCEDIRS)/wis-tar.o $(SOURCEDIRS)/fileutil.o
+$(MAIN3): wis-untar.o fileutil.o
+	$(CC) $(CFLAGS) -o $(OUTPUTMAIN3) $(SOURCEDIRS)/wis-untar.o $(SOURCEDIRS)/fileutil.o
 
+fileutil.o:
+	gcc -Wall -Wextra -g -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=700 -Iinclude -c src/fileutil.c  -o src/fileutil.o
+
+wis-grep.o:
+	gcc -Wall -Wextra -g -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=700 -Iinclude -c src/wis-grep.c  -o src/wis-grep.o
+
+wis-tar.o:
+	gcc -Wall -Wextra -g -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=700 -Iinclude -c src/wis-tar.c  -o src/wis-tar.o
+
+wis-untar.o:
+	gcc -Wall -Wextra -g -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=700 -Iinclude -c src/wis-untar.c  -o src/wis-untar.o
 # this is a suffix replacement rule for building .o's from .c's
 # it uses automatic variables $<: the name of the prerequisite of
 # the rule(a .c file) and $@: the name of the target of the rule (a .o file) 
@@ -84,11 +100,15 @@ $(MAIN): $(OBJECTS)
 
 .PHONY: clean
 clean:
-	$(RM) $(OUTPUTMAIN)
+	$(RM) $(OUTPUTMAIN1)
+	$(RM) $(OUTPUTMAIN2)
+	$(RM) $(OUTPUTMAIN3)
 	$(RM) $(call FIXPATH,$(OBJECTS))
 	rm -f tarfile.txt
 	@echo Cleanup complete!
 
 run: all
-	./$(OUTPUTMAIN)
+	./$(OUTPUTMAIN1)
+	./$(OUTPUTMAIN2)
+	./$(OUTPUTMAIN3)
 	@echo Executing 'run: all' complete!

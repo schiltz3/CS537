@@ -67,7 +67,7 @@ int tarFile(fileOption *ft, fileOption *fo);
 
 /**
  * @brief Create files from a tar file
- * 
+ *
  * @param ft tar file to explode
  * @return int -1 = error, 0 = sucess
  */

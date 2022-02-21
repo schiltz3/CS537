@@ -18,13 +18,12 @@ int main(int argc, char *argv[])
   {
     // Open tar file
     fileOption *ft = initFileOption();
-    ft->fileName = argv[1];
-    ft->fp = fopen(argv[1], "w");
+    openFile(ft, argv[1], "w");
     // if error occures, print error, free memeory and exit
-    if (ft->fp == NULL)
+    if (ft->fp == NULL || ft->error != 0)
     {
-      fprintf(stderr, RED "\nError[%d]\n", ft->error);
-      fprintf(stderr, NC "%s: %s\n\n", strerror(ft->error), ft->fileName);
+      fprintf(stderr, RED "\nError[%d]\n" NC, ft->error);
+      fprintf(stderr, "%s: %s\n\n", strerror(ft->error), ft->fileName);
       closeFile(ft);
       exit(EXIT_FAILURE);
     }

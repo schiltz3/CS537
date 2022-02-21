@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
   case 2: // Un-tar files
   {
     fileOption *ft = initFileOption();
-    openFile(ft, argv[1],"r");
+    openFile(ft, argv[1], "r");
 
     untarFile(ft);
 
