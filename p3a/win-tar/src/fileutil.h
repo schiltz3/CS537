@@ -5,6 +5,10 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdint.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #define RED "\x1B[0;31m"
 #define NC "\x1B[0m"
@@ -56,8 +60,16 @@ int searchFile(fileOption *fo, char *searchTerm);
  * 
  * @param ft tar file to concatinate into
  * @param fo file to concatinate onto the tar file
- * @return int 
+ * @return int -1 = error, 0 = sucess
  */
 int tarFile(fileOption *ft, fileOption *fo);
+
+/**
+ * @brief check if file has any null pointers or err is set
+ * 
+ * @param fo file pointer to check
+ * @return int -1 = error, 0 = sucess
+ */
+int validateFileOption(fileOption *fo);
 
 #endif

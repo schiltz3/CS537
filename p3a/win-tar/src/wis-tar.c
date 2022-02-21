@@ -18,7 +18,16 @@ int main(int argc, char *argv[])
   {
     // Open tar file
     fileOption *ft = initFileOption();
-    getFile(ft, argv[1]);
+    ft->fileName = argv[1];
+    ft->fp = fopen(argv[1], "w");
+    // if error occures, print error, free memeory and exit
+    if (ft->fp == NULL)
+    {
+      fprintf(stderr, RED "\nError[%d]\n", ft->error);
+      fprintf(stderr, NC "%s: %s\n\n", strerror(ft->error), ft->fileName);
+      closeFile(ft);
+      exit(EXIT_FAILURE);
+    }
 
     // Concatenate all files onto it
     for (i = 2; i < argc; i++)
@@ -28,6 +37,7 @@ int main(int argc, char *argv[])
       tarFile(ft, fo);
       closeFile(fo);
     }
+    closeFile(ft);
   }
   }
   exit(1);
