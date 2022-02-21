@@ -56,3 +56,7 @@ p3a/output/
 p3a/win-tar/output/
 
 p3a/win-grep/output/
+
+p3a/wis-tar/output/
+
+p3a/wis-untar/.vscode/
