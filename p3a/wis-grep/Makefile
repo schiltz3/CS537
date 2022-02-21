@@ -27,7 +27,7 @@ INCLUDE	:= include
 LIB		:= lib
 
 ifeq ($(OS),Windows_NT)
-MAIN	:= main.exe
+MAIN	:= wis-grep.exe
 SOURCEDIRS	:= $(SRC)
 INCLUDEDIRS	:= $(INCLUDE)
 LIBDIRS		:= $(LIB)

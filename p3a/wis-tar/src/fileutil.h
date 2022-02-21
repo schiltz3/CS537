@@ -57,7 +57,7 @@ int searchFile(fileOption *fo, char *searchTerm);
 
 /**
  * @brief concatinate one file onto another
- * 
+ *
  * @param ft tar file to concatinate into
  * @param fo file to concatinate onto the tar file
  * @return int -1 = error, 0 = sucess
@@ -66,7 +66,7 @@ int tarFile(fileOption *ft, fileOption *fo);
 
 /**
  * @brief check if file has any null pointers or err is set
- * 
+ *
  * @param fo file pointer to check
  * @return int -1 = error, 0 = sucess
  */
