@@ -1,3 +1,8 @@
+// wis-untar.c
+// John Schiltz
+// 16/02/2022
+// 02/23/2022
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "fileutil.h"
@@ -14,9 +19,7 @@ int main(int argc, char *argv[])
   {
     fileOption *ft = initFileOption();
     openFile(ft, argv[1], "r");
-
     untarFile(ft);
-
     closeFile(ft);
   }
   break;

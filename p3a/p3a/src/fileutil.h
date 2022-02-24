@@ -1,3 +1,8 @@
+// fileutil.h
+// John Schiltz
+// 16/02/2022
+// 02/23/2022
+
 #ifndef FILEUTIL_H
 #define FILEUTIL_H
 
@@ -13,13 +18,17 @@
 #define RED "\x1B[0;31m"
 #define NC "\x1B[0m"
 
-#define SEARCH_BUFF_LEN_DEF 100
+#define SEARCH_BUFF_LEN_DEF 100 /* starting size of search buffer*/
 
+/**
+ * @brief Struct to hold open file pointer, name and error which is a copy of errno if thrown.
+ * 
+ */
 typedef struct fileOption
 {
-  int error;
-  FILE *fp;
-  char *fileName;
+  int error; //!< Copy of errno if thrown
+  FILE *fp;  //!< Pointer to open file
+  char *fileName; //!< Name of file
 } fileOption;
 
 /**

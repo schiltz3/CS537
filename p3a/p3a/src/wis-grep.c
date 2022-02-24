@@ -1,3 +1,8 @@
+// wis-grep.c
+// John Schiltz
+// 16/02/2022
+// 02/23/2022
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "fileutil.h"
