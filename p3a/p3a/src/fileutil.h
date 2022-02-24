@@ -22,12 +22,12 @@
 
 /**
  * @brief Struct to hold open file pointer, name and error which is a copy of errno if thrown.
- * 
+ *
  */
 typedef struct fileOption
 {
-  int error; //!< Copy of errno if thrown
-  FILE *fp;  //!< Pointer to open file
+  int error;      //!< Copy of errno if thrown
+  FILE *fp;       //!< Pointer to open file
   char *fileName; //!< Name of file
 } fileOption;
 

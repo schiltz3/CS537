@@ -176,7 +176,6 @@ int untarFile(fileOption *ft)
     /* read file length from tar */
     uint64_t fileLen = atoi(fileLenBuff);
 
-
     /* allocate file contents buffer*/
     char *transferBuff = malloc(fileLen);
     if (transferBuff == NULL)
