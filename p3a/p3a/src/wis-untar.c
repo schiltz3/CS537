@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
   break;
   default:
   {
-    printf("Too many args:");
+    printf("Too many args\n");
   }
   }
   exit(1);

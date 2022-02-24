@@ -65,7 +65,7 @@ OBJECTS		:= $(SOURCES:.c=.o)
 
 OUTPUTMAIN1	:= $(call FIXPATH,$(OUTPUT)/$(MAIN1))
 OUTPUTMAIN2	:= $(call FIXPATH,$(OUTPUT)/$(MAIN2))
-OUTPUTMAIN3	:= $(call FIXPATH,$(OUTPUT)/$(MAIN2))
+OUTPUTMAIN3	:= $(call FIXPATH,$(OUTPUT)/$(MAIN3))
 
 all: $(OUTPUT) $(MAIN1) $(MAIN2) $(MAIN3)
 	@echo Executing 'all' complete!
@@ -100,9 +100,6 @@ wis-untar.o:
 
 .PHONY: clean
 clean:
-	$(RM) $(OUTPUTMAIN1)
-	$(RM) $(OUTPUTMAIN2)
-	$(RM) $(OUTPUTMAIN3)
 	$(RM) $(call FIXPATH,$(OBJECTS))
 	rm -f tarfile.txt
 	@echo Cleanup complete!

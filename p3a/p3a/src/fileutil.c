@@ -29,9 +29,9 @@ int openFile(fileOption *fo, char *fileName, char *mode)
   if (fo->fp == NULL)
   {
     fo->error = errno;
-    fprintf(stderr, RED "\nError[%d]\n" NC, fo->error);
+    fprintf(stderr, RED "Error[%d]\n" NC, fo->error);
     fprintf(stderr, "%s: %s\n", strerror(fo->error), fileName);
-    fprintf(stderr, RED "\nFILE: %s\nLINE: %d\n" NC, __FILE__, __LINE__);
+    fprintf(stderr, RED "FILE: %s\nLINE: %d\n" NC, __FILE__, __LINE__);
     return -1;
   }
   return 0;
@@ -189,9 +189,19 @@ int untarFile(fileOption *ft)
 
 int validateFileOption(fileOption *fo)
 {
-  if (fo == NULL || fo->fileName == NULL || fo->fp == NULL)
+  if (fo == NULL)
   {
-    fprintf(stderr, RED "\nNull pointer:\nFILE: %s\nLINE: %d\n" NC, __FILE__, __LINE__);
+    fprintf(stderr, RED "\nNull fileObject pointer:\nFILE: %s\nLINE: %d\n" NC, __FILE__, __LINE__);
+    return -1;
+  }
+  if (fo->fileName == NULL)
+  {
+    fprintf(stderr, RED "\nNull file Name pointer:\nFILE: %s\nLINE: %d\n" NC, __FILE__, __LINE__);
+    return -1;
+  }
+  if (fo->fp == NULL)
+  {
+    fprintf(stderr, RED "\nNull file pointer:\nFILE: %s\nLINE: %d\n" NC, __FILE__, __LINE__);
     return -1;
   }
   if (fo->error != 0)
