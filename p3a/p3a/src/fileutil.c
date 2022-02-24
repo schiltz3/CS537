@@ -1,3 +1,8 @@
+// fileutil.h
+// John Schiltz
+// 16/02/2022
+// 02/23/2022
+
 #include "fileutil.h"
 
 fileOption *initFileOption()
@@ -161,24 +166,30 @@ int untarFile(fileOption *ft)
     char fileLenBuff[fileLenBuffLen];
     memset(fileLenBuff, '\0', fileLenBuffLen);
 
+    /* read file name from file */
     fread(nameBuff, 1, nameLen, ft->fp);
 
     fread(fileLenBuff, 1, fileLenBuffLen, ft->fp);
     if (feof(ft->fp) != 0)
       return 0;
 
+    /* read file length from tar */
     uint64_t fileLen = atoi(fileLenBuff);
 
+
+    /* allocate file contents buffer*/
     char *transferBuff = malloc(fileLen);
     if (transferBuff == NULL)
       fprintf(stderr, RED "\nmalloc failed:\nFILE: %s\nLINE: %d\n" NC, __FILE__, __LINE__);
 
+    /* read file contents from tar */
     fread(transferBuff, 1, fileLen, ft->fp);
 
+    /* create file */
     fileOption *fo = initFileOption();
-
     openFile(fo, nameBuff, "w");
 
+    /* write file */
     fwrite(transferBuff, 1, fileLen, fo->fp);
 
     closeFile(fo);
@@ -206,7 +217,8 @@ int validateFileOption(fileOption *fo)
   }
   if (fo->error != 0)
   {
-    fprintf(stderr, RED "\nError in file: %s" NC, fo->fileName);
+    fprintf(stderr, RED "\nError[%d]\n" NC, fo->error);
+    fprintf(stderr, "%s: %s\n", strerror(fo->error), fo->fileName);
     return -1;
   }
   return 0;
