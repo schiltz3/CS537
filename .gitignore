@@ -52,3 +52,15 @@ Mkfile.old
 dkms.conf
 
 p3a/output/
+
+p3a/win-tar/output/
+
+p3a/win-grep/output/
+
+p3a/wis-tar/output/
+
+p3a/wis-untar/.vscode/
+
+p3a/p3a/output/
+
+*.zip
