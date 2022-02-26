@@ -64,3 +64,5 @@ p3a/wis-untar/.vscode/
 p3a/p3a/output/
 
 *.zip
+
+p4/.vscode/

@@ -126,14 +126,14 @@ int tarFile(fileOption *ft, fileOption *fo)
     return -1;
   }
 
-  /* convert file len to a string */
-  sprintf(fileLenBuff, "%lu", statbuff.st_size);
-
   /* write file name buffer*/
   fwrite(&nameBuff, 1, nameLen, ft->fp);
 
   /* write file size buffer*/
-  fwrite(&fileLenBuff, 1, fileLenBuffLen, ft->fp);
+  //fwrite(&fileLenBuff, 1, fileLenBuffLen, ft->fp);
+
+  uint64_t fileSize = statbuff.st_size;
+  fwrite(&fileSize, 1, sizeof(fileSize), ft->fp);
 
   const uint16_t transferBuffLen = 4096;
   char transferBuff[transferBuffLen];
@@ -161,20 +161,15 @@ int untarFile(fileOption *ft)
     char nameBuff[nameLen];
     memset(nameBuff, '\0', nameLen);
 
-    /* set up file length buffer */
-    const uint8_t fileLenBuffLen = 4;
-    char fileLenBuff[fileLenBuffLen];
-    memset(fileLenBuff, '\0', fileLenBuffLen);
-
     /* read file name from file */
     fread(nameBuff, 1, nameLen, ft->fp);
 
-    fread(fileLenBuff, 1, fileLenBuffLen, ft->fp);
+    /* read file length from tar */
+    uint64_t fileLen;
+    fread(&fileLen, 1, sizeof(fileLen), ft->fp);
+
     if (feof(ft->fp) != 0)
       return 0;
-
-    /* read file length from tar */
-    uint64_t fileLen = atoi(fileLenBuff);
 
     /* allocate file contents buffer*/
     char *transferBuff = malloc(fileLen);
