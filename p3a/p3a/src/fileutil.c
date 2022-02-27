@@ -130,8 +130,6 @@ int tarFile(fileOption *ft, fileOption *fo)
   fwrite(&nameBuff, 1, nameLen, ft->fp);
 
   /* write file size buffer*/
-  //fwrite(&fileLenBuff, 1, fileLenBuffLen, ft->fp);
-
   uint64_t fileSize = statbuff.st_size;
   fwrite(&fileSize, 1, sizeof(fileSize), ft->fp);
 
