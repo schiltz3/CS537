@@ -7,7 +7,7 @@
 CC = gcc
 
 # define any compile-time flags
-CFLAGS	:= -Wall -Wextra -g -std=c99 -pedantic -ggdb -D_XOPEN_SOURCE=700 
+CFLAGS	:= -Wall -Wextra -g -std=c99 -pedantic -ggdb -D _XOPEN_SOURCE=700 -D _DEFAULT_SOURCE
 
 # define library paths in addition to /usr/lib
 #   if I wanted to include libraries not in /usr/lib I'd specify

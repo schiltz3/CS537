@@ -4,8 +4,7 @@
 #include <string.h>
 #include <errno.h>
 
-#define RED "\x1B[0;31m"
-#define NC "\x1B[0m"
+#include "shellUtil.h"
 
 int main(int argc, char *argv[])
 {
@@ -18,37 +17,27 @@ int main(int argc, char *argv[])
 	{
 		while (true)
 		{
-			char *input = NULL;
-			size_t inputLen = 0;
-			ssize_t charsRead = 0;
-			printf("smash>");
-			charsRead = getline(&input, &inputLen, stdin);
-
-			input[charsRead-1] = '\0';
-
-			printf("Input:%s\n", input);
-
-			if (errno != 0)
-			{
-				fprintf(stderr, RED "\nError[%d]\n" NC, errno);
-				fprintf(stderr, "%s\n", strerror(errno));
-				fprintf(stderr, RED "\nFILE: %s\nLINE: %d\n" NC, __FILE__, __LINE__);
-				free(input);
-				exit(EXIT_FAILURE);
-			}
-			printf("Strcmp: %d\n", strcmp(input, "exit"));
-
-			if (strcmp(input, "exit") == 0 || feof(stdin) != 0)
-			{
-				free(input);
-				exit(EXIT_SUCCESS);
-			}
-
-			free(input);
+			char *line = smashReadLine(stdin);
+			char **tokens = smashSplitLine(line);
+			smashLaunch(tokens);
 		}
 	}
 	else if (argc == 2)
 	{
+		printf("File to read from: %s\n", argv[1]);
+		FILE *input = fopen(argv[1], "r");
+		if (input == NULL)
+		{
+			perror("fopen");
+			exit(EXIT_FAILURE);
+		}
+		while (true)
+		{
+			char *line = smashReadLine(input);
+			char **tokens = smashSplitLine(line);
+			smashLaunch(tokens);
+		}
+		fclose(input);
 	}
 
 	return (0);
