@@ -14,13 +14,17 @@
 #define RED "\x1B[0;31m"
 #define NC "\x1B[0m"
 
+/**
+ * @brief read a line from a file
+ * 
+ * @param stdhi file pointer to read from
+ * @return char* line read form file
+ */
 char *smashReadLine(FILE *stdhi);
 char **smashSplitLine(char *line);
+int smashCommand(char **tokens);
 int smashLaunch(char **args);
 bool isempty(const char *s);
-int smashCommand(char **tokens);
 int tokenLength(char **tokens);
-
-char* path = NULL;
 
 #endif
