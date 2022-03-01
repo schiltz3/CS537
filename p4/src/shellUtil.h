@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <wait.h>
+#include <ctype.h>
 
 #define RED "\x1B[0;31m"
 #define NC "\x1B[0m"
@@ -15,5 +16,7 @@
 char *smashReadLine(FILE *stdhi);
 char **smashSplitLine(char *line);
 int smashLaunch(char **args);
+bool isempty(const char *s);
+void smashCommand(char **tokens);
 
 #endif

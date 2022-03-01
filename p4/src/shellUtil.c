@@ -7,12 +7,18 @@ char *smashReadLine(FILE *stdhi)
 	size_t inputLen = 0;
 	ssize_t charsRead = 0;
 
-	printf("smash>");
-
-	charsRead = getline(&input, &inputLen, stdhi);
+	// printf("smash>");
 
 	// TODO: filter out leading and trailing whitespace
 	// TODO: filter out empty lines
+
+	charsRead = getline(&input, &inputLen, stdhi);
+	if (errno != 0)
+	{
+		perror("getline");
+		free(input);
+		exit(EXIT_FAILURE);
+	}
 
 	if (feof(stdhi))
 	{
@@ -21,23 +27,9 @@ char *smashReadLine(FILE *stdhi)
 		exit(EXIT_SUCCESS);
 	}
 
-	if (errno != 0)
-	{
-		fprintf(stderr, RED "\nError[%d]\n" NC, errno);
-		fprintf(stderr, "%s\n", strerror(errno));
-		fprintf(stderr, RED "\nFILE: %s\nLINE: %d\n" NC, __FILE__, __LINE__);
-		free(input);
-		exit(EXIT_FAILURE);
-	}
-
 	input[charsRead - 1] = '\0';
-	printf("Input:%s\n", input);
 
-	if (strcmp(input, "exit") == 0)
-	{
-		free(input);
-		exit(EXIT_SUCCESS);
-	}
+	printf("Input:%s\n", input);
 
 	return input;
 }
@@ -52,6 +44,7 @@ char **smashSplitLine(char *line)
 		fprintf(stderr, "NULL Pointer\n");
 		exit(EXIT_FAILURE);
 	}
+
 	int bufSize = STARTING_TOK_BUFSIZE;
 	int bufIndex = 0;
 
@@ -66,7 +59,11 @@ char **smashSplitLine(char *line)
 
 	while ((token = strsep(&line, TOKEN_DELIMINATORS)) != NULL)
 	{
-		// printf("Token: %s\n", token);
+		if (isempty(token))
+		{
+			continue;
+		}
+		printf("Token:%s\n", token);
 		tokens[bufIndex] = token;
 		++bufIndex;
 		if (bufIndex == bufSize)
@@ -89,7 +86,6 @@ int smashLaunch(char **args)
 	pid_t pid;
 	pid_t wpid;
 	int status;
-
 	pid = fork();
 	if (pid == 0)
 	{
@@ -117,4 +113,34 @@ int smashLaunch(char **args)
 		} while (WIFEXITED(status) == false && WIFSIGNALED(status) == false);
 	}
 	return 0;
+}
+
+bool isempty(const char *s)
+{
+	while (*s)
+	{
+		if (!isspace(*s))
+			return false;
+		s++;
+	}
+	return true;
+}
+
+void smashCommand(char **tokens){
+
+	if(tokens == NULL){
+		fprintf(stderr,RED"NULL passed to smashCommand"NC);
+		exit(EXIT_FAILURE);
+	}
+	if (strcmp(tokens[0], "exit") == 0)
+	{
+		printf("\nEXITING SMASH\n");
+		exit(EXIT_SUCCESS);
+	}
+	else if (strcmp(tokens[0], "cd") == 0){
+		//chdir
+	}
+	else if (strcmp(tokens[0], "add") == 0){}
+	else if (strcmp(tokens[0], "remove") == 0){}
+	else if (strcmp(tokens[0], "clear") == 0){}
 }

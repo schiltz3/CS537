@@ -17,14 +17,20 @@ int main(int argc, char *argv[])
 	{
 		while (true)
 		{
+			printf("smash>");
 			char *line = smashReadLine(stdin);
+			//if (isempty(line))
+			//{
+			//	printf("Empty Line\n");
+			//	continue;
+			//}
 			char **tokens = smashSplitLine(line);
 			smashLaunch(tokens);
 		}
 	}
 	else if (argc == 2)
 	{
-		printf("File to read from: %s\n", argv[1]);
+		printf("File to read from: %s\n\n", argv[1]);
 		FILE *input = fopen(argv[1], "r");
 		if (input == NULL)
 		{
@@ -34,8 +40,15 @@ int main(int argc, char *argv[])
 		while (true)
 		{
 			char *line = smashReadLine(input);
+			if (isempty(line))
+			{
+				printf("\n");
+				continue;
+			}
 			char **tokens = smashSplitLine(line);
+			smashCommand(tokens);
 			smashLaunch(tokens);
+			printf("\n");
 		}
 		fclose(input);
 	}
