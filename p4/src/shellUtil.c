@@ -7,11 +7,6 @@ char *smashReadLine(FILE *stdhi)
 	size_t inputLen = 0;
 	ssize_t charsRead = 0;
 
-	// printf("smash>");
-
-	// TODO: filter out leading and trailing whitespace
-	// TODO: filter out empty lines
-
 	charsRead = getline(&input, &inputLen, stdhi);
 	if (errno != 0)
 	{
@@ -115,6 +110,85 @@ int smashLaunch(char **args)
 	return 0;
 }
 
+int smashCommand(char **tokens)
+{
+	if (tokens == NULL)
+	{
+		fprintf(stderr, RED "NULL passed to smashCommand" NC);
+		exit(EXIT_FAILURE);
+	}
+	int tokenLen = tokenLength(tokens);
+	printf("TokenLen:%d\n",tokenLen);
+
+	if (strcmp(tokens[0], "exit") == 0)
+	{
+		printf("\nEXITING SMASH\n");
+		exit(EXIT_SUCCESS);
+	}
+	// cd command
+	else if (strcmp(tokens[0], "cd") == 0)
+	{
+		printf("Change dir\n");
+		if (tokenLen <2 || tokenLen > 2)
+		{
+			fprintf(stderr, RED "cd [path]\n"NC);
+			return 1;
+		}
+		if (chdir(tokens[0]) != 0)
+		{
+			perror("chdir");
+			exit(EXIT_FAILURE);
+		}
+		return 1;
+	}
+	// Path commands
+	else if (strcmp(tokens[0], "path") == 0)
+	{
+		if(tokens[1] == NULL){
+			fprintf(stderr, RED"Path [add], [remove], [clear]\n"NC);
+			return 1;
+		}
+		printf("Path:\n%s\n",path);
+		if (strcmp(tokens[1], "add") == 0)
+		{
+			if(tokens[2] == NULL){
+				fprintf(stderr, RED "No path provided\n"NC);
+				return 1;
+			}
+			int pathLen = 0;
+			if(path != NULL){
+				pathLen = strlen(path);
+			}
+
+			//TODO: Create path string from tokens[2]
+			//TODO: concatinate path here
+
+			return 1;
+		}
+		else if (strcmp(tokens[1], "remove") == 0)
+		{
+			if(tokens[2] == NULL){
+				fprintf(stderr, RED "No path provided\n"NC);
+				return 1;
+			}
+			//TODO: Search form and remove tokens[2]
+			return 1;
+		}
+		else if (strcmp(tokens[1], "clear") == 0)
+		{
+			if(path != NULL){
+				free(path);
+			}
+			return 1;
+		}
+		else{
+			fprintf(stderr, RED "Incorrect path argument%s\n"NC, tokens[1]);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 bool isempty(const char *s)
 {
 	while (*s)
@@ -126,21 +200,12 @@ bool isempty(const char *s)
 	return true;
 }
 
-void smashCommand(char **tokens){
-
-	if(tokens == NULL){
-		fprintf(stderr,RED"NULL passed to smashCommand"NC);
-		exit(EXIT_FAILURE);
-	}
-	if (strcmp(tokens[0], "exit") == 0)
+int tokenLength(char **tokens)
+{
+	int len = 0;
+	while (tokens[len] != NULL)
 	{
-		printf("\nEXITING SMASH\n");
-		exit(EXIT_SUCCESS);
+		len++;
 	}
-	else if (strcmp(tokens[0], "cd") == 0){
-		//chdir
-	}
-	else if (strcmp(tokens[0], "add") == 0){}
-	else if (strcmp(tokens[0], "remove") == 0){}
-	else if (strcmp(tokens[0], "clear") == 0){}
+	return len;
 }

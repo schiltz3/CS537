@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <wait.h>
 #include <ctype.h>
+#include <pwd.h>
 
 #define RED "\x1B[0;31m"
 #define NC "\x1B[0m"
@@ -17,6 +18,9 @@ char *smashReadLine(FILE *stdhi);
 char **smashSplitLine(char *line);
 int smashLaunch(char **args);
 bool isempty(const char *s);
-void smashCommand(char **tokens);
+int smashCommand(char **tokens);
+int tokenLength(char **tokens);
+
+char* path = NULL;
 
 #endif

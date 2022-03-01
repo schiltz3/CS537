@@ -13,45 +13,47 @@ int main(int argc, char *argv[])
 		printf("Too many arguments\n");
 		exit(EXIT_FAILURE);
 	}
+	FILE *input = NULL;
 	if (argc == 1)
 	{
-		while (true)
-		{
-			printf("smash>");
-			char *line = smashReadLine(stdin);
-			//if (isempty(line))
-			//{
-			//	printf("Empty Line\n");
-			//	continue;
-			//}
-			char **tokens = smashSplitLine(line);
-			smashLaunch(tokens);
-		}
+		input = stdin;
 	}
 	else if (argc == 2)
 	{
 		printf("File to read from: %s\n\n", argv[1]);
-		FILE *input = fopen(argv[1], "r");
-		if (input == NULL)
+		input = fopen(argv[1], "r");
+	}
+
+	if (input == NULL)
+	{
+		perror("fopen");
+		exit(EXIT_FAILURE);
+	}
+	while (true)
+	{
+		printf("smash>");
+		char *line = smashReadLine(input);
+		if (isempty(line))
 		{
-			perror("fopen");
+			printf("\n");
+			continue;
+		}
+		char **tokens = smashSplitLine(line);
+
+		int ret = smashCommand(tokens);
+		if (ret == 1)
+		{
+			continue;
+		}
+		else if (ret == -1)
+		{
+			fprintf(stderr, RED "smashCommand Error" NC);
 			exit(EXIT_FAILURE);
 		}
-		while (true)
-		{
-			char *line = smashReadLine(input);
-			if (isempty(line))
-			{
-				printf("\n");
-				continue;
-			}
-			char **tokens = smashSplitLine(line);
-			smashCommand(tokens);
-			smashLaunch(tokens);
-			printf("\n");
-		}
-		fclose(input);
+		smashLaunch(tokens);
+		printf("\n");
 	}
+	fclose(input);
 
 	return (0);
 }
