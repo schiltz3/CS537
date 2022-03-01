@@ -1,2 +1,7 @@
 ls
-ls -a
+
+pwd
+      
+	  ls     -a          
+
+	  exit
