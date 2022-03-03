@@ -147,7 +147,6 @@ int smashCommand(lines_s *tokens, lines_s *path)
 				return 1;
 			}
 
-			// TODO: Create path strings from tokens[2] to path
 			addToPath(path, tokens->lines[2]);
 
 			return 1;
@@ -162,7 +161,6 @@ int smashCommand(lines_s *tokens, lines_s *path)
 				fprintf(stderr, RED "No path provided\n" NC);
 				return 1;
 			}
-			// TODO: Search form and remove tokens[2]
 			removeFromPath(path, tokens->lines[2]);
 			return 1;
 		}
@@ -189,14 +187,16 @@ int smashCommand(lines_s *tokens, lines_s *path)
 
 int smashLaunch(lines_s *args, lines_s *path)
 {
-	// TODO: check for & to run in paraless
+	// TODO: check for & to run in paralell
 	pid_t pid;
 	pid_t wpid;
 	int status;
 	pid = fork();
 	if (pid == 0)
 	{
-		if (execvp(args->lines[0], args->lines) == -1)
+		// TODO: refactor to use execv and iterate over path
+		int ret = execvp(args->lines[0], args->lines);
+		if (ret == -1)
 		{
 			perror("execvp");
 			exit(EXIT_FAILURE);
@@ -306,8 +306,9 @@ int removeFromPath(lines_s *path, char *update)
 		}
 	}
 
-	if(found == false){
-		fprintf(stderr, RED "Could not find path"NC);
+	if (found == false)
+	{
+		fprintf(stderr, RED "Could not find path" NC);
 	}
 
 	return 0;
