@@ -82,7 +82,7 @@ lines_s *smashSplitLine(char *line, char *delims)
 	return lines;
 }
 
-int smashCommand(lines_s *tokens)
+int smashCommand(lines_s *tokens, lines_s *path)
 {
 	// Verify tokens not null
 	if (tokens == NULL)
@@ -181,7 +181,7 @@ int smashCommand(lines_s *tokens)
 	return 0;
 }
 
-int smashLaunch(lines_s *args)
+int smashLaunch(lines_s *args, lines_s *path)
 {
 	// TODO: check for & to run in paraless
 	pid_t pid;
@@ -239,8 +239,39 @@ int tokenLength(char **tokens)
 
 void printLines(lines_s *lines)
 {
+	printf("Lines:\n");
 	for (int i = 0; i < lines->len; i++)
 	{
 		printf("%s\n", lines->lines[i]);
 	}
+}
+
+int addToPath(lines_s * path, char* update){
+	if(path == NULL || update == NULL){
+		perror(RED"Null passed to updatePath\n"NC);
+		return -1;
+	}
+
+//	printf("Update:%s\n",update);
+//	printf("Size before:%d\n",path->size);
+//	printf("Size of update:%lu\n",strlen(update));
+//	printf("Len before:%d\n",path->len);
+
+	path->size = path->size + strlen(update); 
+
+	path->lines = realloc(path->lines, path->size);
+	if(path->lines == NULL){
+		perror("realloc");
+		exit(EXIT_FAILURE);
+	}
+
+	path->len++;
+
+	//printf("Size after:%d\n",path->size);
+	//printf("Len after:%d\n",path->len);
+
+	path->lines[path->len-1] = update;
+
+	printLines(path);
+	return 0;
 }

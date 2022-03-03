@@ -6,6 +6,8 @@
 
 #include "shellUtil.h"
 
+lines_s path = {NULL, 0, 0};
+
 int main(int argc, char *argv[])
 {
 	// Do not start program
@@ -35,6 +37,9 @@ int main(int argc, char *argv[])
 		perror("fopen");
 		exit(EXIT_FAILURE);
 	}
+
+	addToPath(&path, "/bin");
+
 	// Continue executing commands untill the flile is closed, EOF is reached, or the quit
 	// command has been executed
 	while (true)
@@ -59,7 +64,7 @@ int main(int argc, char *argv[])
 			lines_s *tokens = smashSplitLine(lines->lines[i], TOKEN_DELIMINATORS);
 
 			// Execute any shell commands
-			int ret = smashCommand(tokens);
+			int ret = smashCommand(tokens, &path);
 			if (ret == 1)
 			{
 				continue;
@@ -71,7 +76,7 @@ int main(int argc, char *argv[])
 			}
 
 			// execute any system commands
-			smashLaunch(tokens);
+			smashLaunch(tokens, &path);
 
 			printf("\n");
 		}

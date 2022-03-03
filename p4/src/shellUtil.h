@@ -17,11 +17,14 @@
 #define RED "\x1B[0;31m"
 #define NC "\x1B[0m"
 
+
 typedef struct Lines
 {
   char **lines;
   int len;
+  int size;
 } lines_s;
+
 
 /**
  * @brief read a line from a file
@@ -31,10 +34,11 @@ typedef struct Lines
  */
 lines_s *smashReadLine(FILE *stdhi);
 lines_s *smashSplitLine(char *line, char *delims);
-int smashCommand(lines_s *tokens);
-int smashLaunch(lines_s *args);
+int smashCommand(lines_s *tokens, lines_s *path);
+int smashLaunch(lines_s *args, lines_s *path);
 bool isempty(const char *s);
 int tokenLength(char **tokens);
 void printLines(lines_s *lines);
+int addToPath(lines_s *path, char *update);
 
 #endif
