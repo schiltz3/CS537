@@ -10,6 +10,9 @@
 #include <wait.h>
 #include <ctype.h>
 #include <pwd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #define STARTING_TOK_BUFSIZE 64
 #define TOKEN_DELIMINATORS " \t\n\r"
@@ -17,14 +20,12 @@
 #define RED "\x1B[0;31m"
 #define NC "\x1B[0m"
 
-
 typedef struct Lines
 {
   char **lines;
   int len;
   int size;
 } lines_s;
-
 
 /**
  * @brief read a line from a file
@@ -37,9 +38,10 @@ lines_s *smashSplitLine(char *line, char *delims);
 int smashCommand(lines_s *tokens, lines_s *path);
 int smashLaunch(lines_s *args, lines_s *path);
 bool isempty(const char *s);
-int tokenLength(char **tokens);
+int tokenLength(char **tokens); // TODO: remove if not needed
 void printLines(lines_s *lines);
 int addToPath(lines_s *path, char *update);
 int removeFromPath(lines_s *path, char *update);
+int redirect(lines_s *args, lines_s *path);
 
 #endif

@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 	}
 
 	FILE *input = NULL;
-	
+
 	// Read from stdin
 	if (argc == 1)
 	{
@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 		input = fopen(argv[1], "r");
 	}
 
-  // verify input has been selected and properly opened
+	// verify input has been selected and properly opened
 	if (input == NULL)
 	{
 		perror("fopen");
@@ -75,13 +75,14 @@ int main(int argc, char *argv[])
 				exit(EXIT_FAILURE);
 			}
 
+			redirect(tokens, &path);
 			// execute any system commands
-			smashLaunch(tokens, &path);
+			// smashLaunch(tokens, &path);
 
 			printf("\n");
 		}
 	}
-	
+
 	// Close input
 	fclose(input);
 

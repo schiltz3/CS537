@@ -213,7 +213,7 @@ int smashLaunch(lines_s *args, lines_s *path)
 			if (access(lookup_path, F_OK) == 0)
 			{
 
-				int redir = redirect(args);
+				// int redir = redirect(args);
 
 				printf("Run:%s\n", lookup_path);
 				ret = 1;
@@ -351,5 +351,72 @@ int removeFromPath(lines_s *path, char *update)
 		fprintf(stderr, RED "Could not find path" NC);
 	}
 
+	return 0;
+}
+
+int redirect(lines_s *args, lines_s *path)
+{
+	int redirect = -1;
+	bool found_redirect = false;
+	for (int i = 0; i < args->len; i++)
+	{
+		if (strcmp(args->lines[i], ">") == 0)
+		{
+			if (found_redirect == true)
+			{
+				fprintf(stderr, RED "Multiple redirects found\n" NC);
+				return -1;
+			}
+			redirect = i;
+			found_redirect = true;
+		}
+	}
+	if (found_redirect == true)
+	{
+		if (redirect == 0)
+		{
+			fprintf(stderr, RED "Can't start with redirect\n" NC);
+			return -1;
+		}
+		if (args->lines[redirect + 1] == NULL || args->lines[redirect + 2] != NULL)
+		{
+			fprintf(stderr, RED "Must have one arg after redirect\n" NC);
+			return -1;
+		}
+		fflush(stdout);
+		fflush(stderr);
+		int stdio_backup = dup(1);
+
+		printf("Open:%s\n", args->lines[redirect + 1]);
+		int new = open(args->lines[redirect + 1], O_WRONLY | O_CREAT | O_TRUNC);
+
+		if (new < 0)
+		{
+			fprintf(stderr, RED "Can't open file\n" NC);
+			return -1;
+		}
+
+		dup2(new, 1);
+		close(new);
+
+		for (int i = redirect; i < args->len; i++)
+		{
+			args->lines[i] = NULL;
+		}
+		args->len = redirect;
+
+		printf("Trimmed lines\n");
+		printLines(args);
+
+		smashLaunch(args, path);
+
+		fflush(stdout);
+		dup2(stdio_backup, 1);
+		close(stdio_backup);
+	}
+	else
+	{
+		smashLaunch(args, path);
+	}
 	return 0;
 }
