@@ -40,5 +40,6 @@ bool isempty(const char *s);
 int tokenLength(char **tokens);
 void printLines(lines_s *lines);
 int addToPath(lines_s *path, char *update);
+int removeFromPath(lines_s *path, char *update);
 
 #endif

@@ -85,7 +85,7 @@ lines_s *smashSplitLine(char *line, char *delims)
 int smashCommand(lines_s *tokens, lines_s *path)
 {
 	// Verify tokens not null
-	if (tokens == NULL)
+	if (tokens == NULL || path == NULL)
 	{
 		fprintf(stderr, RED "NULL passed to smashCommand" NC);
 		exit(EXIT_FAILURE);
@@ -148,6 +148,7 @@ int smashCommand(lines_s *tokens, lines_s *path)
 			}
 
 			// TODO: Create path strings from tokens[2] to path
+			addToPath(path, tokens->lines[2]);
 
 			return 1;
 		}
@@ -162,12 +163,17 @@ int smashCommand(lines_s *tokens, lines_s *path)
 				return 1;
 			}
 			// TODO: Search form and remove tokens[2]
+			removeFromPath(path, tokens->lines[2]);
 			return 1;
 		}
 
 		// Path clear
 		else if (strcmp(tokens->lines[1], "clear") == 0)
 		{
+			free(path->lines);
+			path->lines = NULL;
+			path->size = 0;
+			path->len = 0;
 			return 1;
 		}
 
@@ -246,32 +252,63 @@ void printLines(lines_s *lines)
 	}
 }
 
-int addToPath(lines_s * path, char* update){
-	if(path == NULL || update == NULL){
-		perror(RED"Null passed to updatePath\n"NC);
+int addToPath(lines_s *path, char *update)
+{
+	if (path == NULL || update == NULL)
+	{
+		perror(RED "Null passed to addToPath\n" NC);
 		return -1;
 	}
 
-//	printf("Update:%s\n",update);
-//	printf("Size before:%d\n",path->size);
-//	printf("Size of update:%lu\n",strlen(update));
-//	printf("Len before:%d\n",path->len);
-
-	path->size = path->size + strlen(update); 
+	path->size = path->size + strlen(update);
 
 	path->lines = realloc(path->lines, path->size);
-	if(path->lines == NULL){
+	if (path->lines == NULL)
+	{
 		perror("realloc");
 		exit(EXIT_FAILURE);
 	}
 
 	path->len++;
 
-	//printf("Size after:%d\n",path->size);
-	//printf("Len after:%d\n",path->len);
+	for (int i = path->len - 1; i > 0; i--)
+	{
+		path->lines[i] = path->lines[i - 1];
+	}
 
-	path->lines[path->len-1] = update;
+	path->lines[0] = update;
 
 	printLines(path);
+	return 0;
+}
+
+int removeFromPath(lines_s *path, char *update)
+{
+	if (path == NULL || update == NULL)
+	{
+		perror(RED "Null passed to removeFromPath\n" NC);
+		return -1;
+	}
+
+	bool found = false;
+
+	for (int i = 0; i < path->len; i++)
+	{
+		if (strcmp(path->lines[i], update) == 0)
+		{
+			found = true;
+			for (int j = i; i < path->len - 1; i++)
+			{
+				path->lines[j] = path->lines[j + 1];
+			}
+			path->lines[path->len - 1] = NULL;
+			--path->len;
+		}
+	}
+
+	if(found == false){
+		fprintf(stderr, RED "Could not find path"NC);
+	}
+
 	return 0;
 }
