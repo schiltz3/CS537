@@ -192,21 +192,61 @@ int smashLaunch(lines_s *args, lines_s *path)
 	pid_t wpid;
 	int status;
 	pid = fork();
+	// Child
 	if (pid == 0)
 	{
-		// TODO: refactor to use execv and iterate over path
-		int ret = execvp(args->lines[0], args->lines);
+		int ret = 0;
+		// Iterate over path looking for executable
+		for (int i = 0; i < path->len; i++)
+		{
+			// Create path to executable to try
+			char *lookup_path = malloc(strlen(path->lines[i]) + strlen(args->lines[0]));
+			if (lookup_path == NULL)
+			{
+				perror("malloc");
+				exit(EXIT_FAILURE);
+			}
+
+			sprintf(lookup_path, "%s/%s", path->lines[i], args->lines[0]);
+
+			// If try works
+			if (access(lookup_path, F_OK) == 0)
+			{
+
+				int redir = redirect(args);
+
+				printf("Run:%s\n", lookup_path);
+				ret = 1;
+
+				// Run the executable
+				ret = execv(lookup_path, args->lines);
+				free(lookup_path);
+				break;
+			}
+			else
+			{
+				printf("Access denied\n");
+			}
+
+			free(lookup_path);
+		}
+		if (ret == 0)
+		{
+			printf("Failed to find program in path");
+		}
 		if (ret == -1)
 		{
-			perror("execvp");
+			perror("execv");
 			exit(EXIT_FAILURE);
 		}
 	}
+	// Failed fork
 	else if (pid < 0)
 	{
 		perror("fork");
 		exit(EXIT_FAILURE);
 	}
+	// Child
 	else
 	{
 		do
