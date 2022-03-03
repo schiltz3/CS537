@@ -1,6 +1,6 @@
 #include "shellUtil.h"
 
-char *smashReadLine(FILE *stdhi)
+lines_s *smashReadLine(FILE *stdhi)
 {
 
 	char *input = NULL;
@@ -24,15 +24,12 @@ char *smashReadLine(FILE *stdhi)
 
 	input[charsRead - 1] = '\0';
 
-	printf("Input:%s\n", input);
+	lines_s *lines = smashSplitLine(input, ";");
 
-	return input;
+	return lines;
 }
 
-#define STARTING_TOK_BUFSIZE 64
-#define TOKEN_DELIMINATORS " \t\n\r"
-
-char **smashSplitLine(char *line)
+lines_s *smashSplitLine(char *line, char *delims)
 {
 	if (line == NULL)
 	{
@@ -43,6 +40,7 @@ char **smashSplitLine(char *line)
 	int bufSize = STARTING_TOK_BUFSIZE;
 	int bufIndex = 0;
 
+	lines_s *lines = malloc(sizeof(lines_s));
 	char **tokens = malloc(bufSize * sizeof(char *));
 	char *token;
 
@@ -51,14 +49,18 @@ char **smashSplitLine(char *line)
 		perror("Malloc");
 		exit(EXIT_FAILURE);
 	}
+	if (lines == NULL)
+	{
+		perror("Malloc");
+		exit(EXIT_FAILURE);
+	}
 
-	while ((token = strsep(&line, TOKEN_DELIMINATORS)) != NULL)
+	while ((token = strsep(&line, delims)) != NULL)
 	{
 		if (isempty(token))
 		{
 			continue;
 		}
-		printf("Token:%s\n", token);
 		tokens[bufIndex] = token;
 		++bufIndex;
 		if (bufIndex == bufSize)
@@ -73,11 +75,14 @@ char **smashSplitLine(char *line)
 		}
 	}
 	tokens[bufIndex] = NULL;
-	return tokens;
+
+	lines->lines = tokens;
+	lines->len = bufIndex;
+
+	return lines;
 }
 
-
-int smashCommand(char **tokens)
+int smashCommand(lines_s *tokens)
 {
 	// Verify tokens not null
 	if (tokens == NULL)
@@ -87,35 +92,34 @@ int smashCommand(char **tokens)
 	}
 
 	// Caluclate number of tokens
-	int tokenLen = tokenLength(tokens);
-	printf("TokenLen:%d\n", tokenLen);
+	// printf("Number of tokens:%d\n", tokens->len);
 
 	// exit
-	if (strcmp(tokens[0], "exit") == 0)
+	if (strcmp(tokens->lines[0], "exit") == 0)
 	{
 		printf("\nEXITING SMASH\n");
 		exit(EXIT_SUCCESS);
 	}
 
 	// cd command
-	else if (strcmp(tokens[0], "cd") == 0)
+	else if (strcmp(tokens->lines[0], "cd") == 0)
 	{
 		// Verify path exists
-		if (tokens[1] == NULL)
+		if (tokens->lines[1] == NULL)
 		{
 			fprintf(stderr, RED "NULL Passed to cd\n" NC);
 			return 1;
 		}
 
 		// Verify number of arguments
-		if (tokenLen < 2 || tokenLen > 2)
+		if (tokens->len < 2 || tokens->len > 2)
 		{
 			fprintf(stderr, RED "cd [path]\n" NC);
 			return 1;
 		}
 
 		// Change directory
-		if (chdir(tokens[1]) != 0)
+		if (chdir(tokens->lines[1]) != 0)
 		{
 			perror("chdir");
 			exit(EXIT_FAILURE);
@@ -124,20 +128,20 @@ int smashCommand(char **tokens)
 	}
 
 	// Path commands
-	else if (strcmp(tokens[0], "path") == 0)
+	else if (strcmp(tokens->lines[0], "path") == 0)
 	{
 		// Path default
 		// Verify path arg exists
-		if (tokens[1] == NULL)
+		if (tokens->lines[1] == NULL)
 		{
 			fprintf(stderr, RED "Path [add], [remove], [clear]\n" NC);
 			return 1;
 		}
 		// Path add
-		if (strcmp(tokens[1], "add") == 0)
+		if (strcmp(tokens->lines[1], "add") == 0)
 		{
 			// Verify path add arg exists
-			if (tokens[2] == NULL)
+			if (tokens->lines[2] == NULL)
 			{
 				fprintf(stderr, RED "No path provided\n" NC);
 				return 1;
@@ -147,12 +151,12 @@ int smashCommand(char **tokens)
 
 			return 1;
 		}
-		
+
 		// Path remove
-		else if (strcmp(tokens[1], "remove") == 0)
+		else if (strcmp(tokens->lines[1], "remove") == 0)
 		{
 			// Verify path remove arg exists
-			if (tokens[2] == NULL)
+			if (tokens->lines[2] == NULL)
 			{
 				fprintf(stderr, RED "No path provided\n" NC);
 				return 1;
@@ -160,9 +164,9 @@ int smashCommand(char **tokens)
 			// TODO: Search form and remove tokens[2]
 			return 1;
 		}
-		
+
 		// Path clear
-		else if (strcmp(tokens[1], "clear") == 0)
+		else if (strcmp(tokens->lines[1], "clear") == 0)
 		{
 			return 1;
 		}
@@ -170,16 +174,15 @@ int smashCommand(char **tokens)
 		// Path incorrect arg
 		else
 		{
-			fprintf(stderr, RED "Incorrect path argument%s\n" NC, tokens[1]);
+			fprintf(stderr, RED "Incorrect path argument%s\n" NC, tokens->lines[1]);
 			return 1;
 		}
 	}
 	return 0;
 }
 
-int smashLaunch(char **args)
+int smashLaunch(lines_s *args)
 {
-	// TODO: split commands on semi colins here
 	// TODO: check for & to run in paraless
 	pid_t pid;
 	pid_t wpid;
@@ -187,7 +190,7 @@ int smashLaunch(char **args)
 	pid = fork();
 	if (pid == 0)
 	{
-		if (execvp(args[0], args) == -1)
+		if (execvp(args->lines[0], args->lines) == -1)
 		{
 			perror("execvp");
 			exit(EXIT_FAILURE);
@@ -232,4 +235,12 @@ int tokenLength(char **tokens)
 		len++;
 	}
 	return len;
+}
+
+void printLines(lines_s *lines)
+{
+	for (int i = 0; i < lines->len; i++)
+	{
+		printf("%s\n", lines->lines[i]);
+	}
 }
