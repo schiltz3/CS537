@@ -24,8 +24,15 @@ struct cmd_s *execCmd(struct path_s *path, char *argv)
     return NULL;
   }
 
-  memset(cmd, 0, sizeof(*cmd));
   cmd->type = EXEC;
+  cmd->cmd = malloc(sizeof(struct exec_cmd_s));
+  if (cmd->cmd == NULL)
+  {
+    returnPErr("Malloc");
+    free(cmd);
+    return NULL;
+  }
+
   return cmd;
 }
 
@@ -105,7 +112,7 @@ int removePath(struct path_s *path, char *remove)
 {
   if (path == NULL || remove == NULL)
   {
-    return returnErr("Null passed to removeFromPath\n");
+    return returnErr("Null passed to removePath");
   }
 
   int found = -1;
@@ -140,4 +147,30 @@ int printPath(struct path_s *path)
     printf("%s\n", path->path[i]);
   }
   return 0;
+}
+
+int getLine(FILE *stream, char *buff, int *len)
+{
+  if (stream == NULL || buff == NULL)
+  {
+    return returnErr("Null passed to getLine");
+  }
+  size_t Len = 0;
+  if (getline(&buff, &Len, stream) == -1)
+  {
+    return returnPErr("getline");
+  }
+  *len = Len;
+  return 0;
+}
+
+bool isempty(const char *s)
+{
+  while (*s)
+  {
+    if (!isspace(*s))
+      return false;
+    s++;
+  }
+  return true;
 }
