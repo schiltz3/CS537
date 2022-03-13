@@ -1,5 +1,6 @@
 #include "shellUtil.h"
 
+/*****************************Error Functions************************************/
 int returnErr(char *error_msg)
 {
   fprintf(stderr, RED "%s\n" NC, error_msg);
@@ -14,7 +15,8 @@ int returnPErr(char *failed_func)
   // exit(EXIT_FAILURE);
 }
 
-struct cmd_s *execCmd(struct path_s *path, char *argv)
+/*****************************Command Functions**********************************/
+struct cmd_s *execCmd(struct path_s *path, char **argv)
 {
 
   struct cmd_s *cmd = malloc(sizeof(*cmd));
@@ -25,13 +27,14 @@ struct cmd_s *execCmd(struct path_s *path, char *argv)
   }
 
   cmd->type = EXEC;
-  cmd->cmd = malloc(sizeof(struct exec_cmd_s));
-  if (cmd->cmd == NULL)
+  cmd->cmd.exec = (struct exec_cmd_s *)malloc(sizeof(struct exec_cmd_s));
+  if (cmd->cmd.exec == NULL)
   {
     returnPErr("Malloc");
     free(cmd);
     return NULL;
   }
+  cmd->cmd.exec->argv = argv;
 
   return cmd;
 }
@@ -40,7 +43,7 @@ void printCmd(struct cmd_s *cmd)
 {
   if (verifyCmd(cmd) != 0)
   {
-    fprintf(stderr, RED "Invalid cmd passed to printCmd" NC);
+    returnErr("Invalid cmd passed to printCmd");
     return;
   }
 
@@ -49,6 +52,19 @@ void printCmd(struct cmd_s *cmd)
   case EXEC:
   {
     printf("EXEC:\n");
+    printf("└Argv[");
+    for (int i = 0; cmd->cmd.exec->argv[i] != 0; i++)
+    {
+      if (i == 0)
+      {
+        printf("%s", cmd->cmd.exec->argv[i]);
+      }
+      else
+      {
+        printf(",%s", cmd->cmd.exec->argv[i]);
+      }
+    }
+    printf("]\n");
     break;
   }
   default:
@@ -60,19 +76,80 @@ int verifyCmd(struct cmd_s *cmd)
 {
   if (cmd == NULL)
   {
-    fprintf(stderr, RED "Null Cmd Ptr\n" NC);
-    return -1;
+    return returnErr("Null Cmd Ptr");
   }
 
-  if (cmd->type == UNINIT)
+  switch (cmd->type)
   {
+  case UNINIT:
     fprintf(stderr, RED "Uninitialized Cmd Type\n" NC);
-    return -1;
+    return 1;
+  default:
+    break;
   }
 
   return 0;
 }
 
+struct cmd_s *parseCmd(char *s)
+{
+  char *es;
+  struct cmd_s *cmd = NULL;
+
+  es = s + strlen(s);
+  printf("Len:%d\n", (int)strlen(s));
+  printf("s:%s\n", s);
+  printf("es:%s\n", es);
+
+  return cmd;
+}
+
+ int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end_p)
+{
+   char *str = NULL;
+   int ret = -1;
+
+   str = *str_p;
+   // scan string pointer over whitespace
+   while (str < str_end_p && strchr(WHITESPACE, *str) != NULL)
+   {
+     str++;
+   }
+   // Set the command
+   if (str_tok_p != NULL)
+   {
+     *str_tok_p = str;
+   }
+   // Set return to the current position of the str
+   ret = *str;
+   if (*str == '>')
+   {
+     ++str_end_p;
+     if (*str == '>')
+     {
+       ret = '+';
+       str++;
+     }
+   }
+   else
+   {
+     ret = 'a';
+     while (str < str_end_p && strchr(WHITESPACE, *str) == NULL && strchr(SYMBOLS, *str) == NULL)
+     {
+       ++str;
+     }
+   }
+   if(str_tok_end_p != NULL){
+     *str_tok_end_p = str;
+   }
+   while(str < str_end_p && strchr(WHITESPACE, *str) != NULL){
+     str++;
+   }
+   *str_p = str;
+   return ret;
+ }
+
+/*****************************Path Functions*************************************/
 struct path_s *initPath()
 {
   struct path_s *path = malloc(sizeof(*path));
@@ -108,6 +185,7 @@ int addPath(struct path_s *path, char *add)
 
   return 0;
 }
+
 int removePath(struct path_s *path, char *remove)
 {
   if (path == NULL || remove == NULL)
@@ -147,6 +225,21 @@ int printPath(struct path_s *path)
     printf("%s\n", path->path[i]);
   }
   return 0;
+}
+
+/*****************************Line functions*************************************/
+char *createTok(char *str, char *str_end)
+{
+  int len = str_end - str;
+  char *ret = malloc(len + 1);
+  if (ret == NULL)
+  {
+    returnPErr("Malloc failed");
+    return NULL;
+  }
+  strncpy(ret, str, len);
+  ret[len] = '\0';
+  return ret;
 }
 
 int getLine(FILE *stream, char *buff, int *len)
