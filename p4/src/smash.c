@@ -12,7 +12,8 @@ int main(int argc, char *argv[])
 
   char* test_input = input_buff;
 
-  struct cmd_s *cmd = parseExecCmd(&test_input, test_input + strlen(test_input));
+  //struct cmd_s *cmd = parseExecCmd(&test_input, test_input + strlen(test_input));
+  struct cmd_s *cmd = parseRedirCmd(&test_input, test_input + strlen(test_input));
   verifyCmd(cmd);
   printCmd(cmd);
   runCmd(cmd, path);

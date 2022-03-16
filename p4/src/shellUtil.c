@@ -75,12 +75,11 @@ struct cmd_s *parseExecCmd(char **ps, char *str_end)
   char *str_cmd_end;
 
   int tok;
-  char ret = ' ';
   char *argv[100];
   int argc = 0;
   struct cmd_s *cmd;
 
-  while (!peek(&str, str_end, "|&;"))
+  while (!peek(&str, str_end, "|&;>"))
   {
     if ((tok = getToken(&str, str_end, &str_cmd, &str_cmd_end)) == 0)
     {
@@ -110,10 +109,12 @@ struct cmd_s *parseRedirCmd(char **ps, char *str_end)
   char *tok, *tok_end;
 
   cmd = parseExecCmd(ps, str_end);
-  if (peek(ps, str_end, ">"))
+  printf("input:%s\n", *ps);
+  if (!peek(ps, str_end, ">"))
   {
-    int redir = gettoken(ps, str_end, NULL, NULL);
-    if (gettoken(ps, str_end, tok, tok_end) != 'a')
+    int redir = getToken(ps, str_end, NULL, NULL);
+    printf("redir:%c\n",(char) redir);
+    if (getToken(ps, str_end, &tok, &tok_end) != '+')
     {
       returnErr("No file for redirection");
       return NULL;
@@ -354,7 +355,7 @@ int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end
   case '\0':
     break;
   case '>':
-    ++str_end_p;
+    //++str_end_p;
     if (*str == '>')
     {
       ret = '+';
