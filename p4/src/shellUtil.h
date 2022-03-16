@@ -115,7 +115,6 @@ int printPath(struct path_s *path);
  */
 int getToken(char **str_p, char *str_end_p, char **str_cmd, char **str_cmd_args);
 char *createTok(char *str, char *str_end);
-int getLine(FILE *stream, char *buff, int *len);
 int peek(char **ps, char *es, char *toks);
 bool isempty(const char *s);
 

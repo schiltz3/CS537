@@ -344,21 +344,6 @@ char *createTok(char *str, char *str_end)
   return ret;
 }
 
-int getLine(FILE *stream, char *buff, int *len)
-{
-  //if (stream == NULL || buff == NULL)
-  //{
-  //  return returnErr("Null passed to getLine");
-  //}
-  size_t Len = 0;
-  if (getline(&buff, &Len, stream) == -1)
-  {
-    return returnPErr("getline");
-  }
-  *len = Len;
-  return 0;
-}
-
 int peek(char **ps, char *es, char *toks)
 {
   char *s;
