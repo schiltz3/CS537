@@ -43,9 +43,9 @@ struct redir_cmd_s
 {
   struct cmd_s *cmd;
   char *file_name;
-  //FILE *fp;
-  //int stdio_backup;
-  //int stderr_backup;
+  // FILE *fp;
+  // int stdio_backup;
+  // int stderr_backup;
 };
 
 struct list_cmd_s
@@ -85,17 +85,18 @@ struct cmd_s *listCmd(struct cmd_s *left, struct cmd_s *right);
 struct cmd_s *parallelCmd(struct cmd_s *left, struct cmd_s *right);
 
 // Parse cmd functions
-struct cmd_s *parseCmd(char*s);
-struct cmd_s *parseExecCmd(char**, char*);
-struct cmd_s *parseRedirCmd(char**, char*);
-struct cmd_s *parseListCmd(char**, char*);
-struct cmd_s *parseParallelCmd(char**, char*);
+struct cmd_s *parseCmd(char *s);
+struct cmd_s *parseExecCmd(char **, char *);
+// struct cmd_s *parseRedirCmd(char**, char*);
+struct cmd_s *parseRedirCmd(struct cmd_s *arg_cmd, char **ps, char *str_end);
+struct cmd_s *parseListCmd(char **, char *);
+struct cmd_s *parseParallelCmd(char **, char *);
 
 // Cmd utils
 int runCmd(struct cmd_s *cmd, struct path_s *path);
 int searchExecPath(struct path_s *path, char *cmd, char **argv);
 int verifyCmd(struct cmd_s *cmd);
-void printCmd(struct cmd_s *cmd);
+void printCmd(struct cmd_s *cmd, char *l_padding);
 
 // Path functions
 struct path_s *initPath();
@@ -113,7 +114,7 @@ int printPath(struct path_s *path);
  * @param str_cmd_args
  * @return int -1 = error, 0 = success, 1 = syntax error
  */
-int getToken(char **str_p, char *str_end_p, char **str_cmd, char **str_cmd_args);
+char getToken(char **str_p, char *str_end_p, char **str_cmd, char **str_cmd_args);
 char *createTok(char *str, char *str_end);
 int peek(char **ps, char *es, char *toks);
 bool isempty(const char *s);

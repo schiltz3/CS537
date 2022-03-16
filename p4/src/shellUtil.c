@@ -55,8 +55,9 @@ struct cmd_s *redirCmd(struct cmd_s *arg_cmd, char *file_name)
     return NULL;
   }
   cmd->type = REDIR;
-  cmd->cmd.redir = (struct redir_cmd_s*)malloc(sizeof(struct redir_cmd_s));
-  if(cmd->cmd.exec == NULL){
+  cmd->cmd.redir = (struct redir_cmd_s *)malloc(sizeof(struct redir_cmd_s));
+  if (cmd->cmd.exec == NULL)
+  {
     returnPErr("Malloc");
     free(cmd);
     return NULL;
@@ -70,59 +71,61 @@ struct cmd_s *redirCmd(struct cmd_s *arg_cmd, char *file_name)
 
 struct cmd_s *parseExecCmd(char **ps, char *str_end)
 {
-  char *str = *ps;
   char *str_cmd;
   char *str_cmd_end;
 
   int tok;
   char *argv[100];
   int argc = 0;
-  struct cmd_s *cmd;
+  struct cmd_s *cmd = execCmd(argv);
 
-  while (!peek(&str, str_end, "|&;>"))
+  while (!peek(ps, str_end, "|&;"))
   {
-    if ((tok = getToken(&str, str_end, &str_cmd, &str_cmd_end)) == 0)
+    if ((tok = getToken(ps, str_end, &str_cmd, &str_cmd_end)) == 0)
     {
       break;
     }
-    if (tok != 'a')
+    if (tok != 'a' && tok != '+')
     {
       printf("syntax\n");
     }
     argv[argc] = createTok(str_cmd, str_cmd_end);
     argc++;
     if (argc >= 100)
+    {
       printf("too many args\n");
-    // ret = parseredirs(ret, str, str_end);
+    }
+    cmd = parseRedirCmd(cmd, ps, str_end);
+    // printf("Str:%s\n", *ps);
   }
   argv[argc] = 0;
 
-  cmd = execCmd(argv);
   verifyCmd(cmd);
 
   return cmd;
 }
 
-struct cmd_s *parseRedirCmd(char **ps, char *str_end)
+struct cmd_s *parseRedirCmd(struct cmd_s *arg_cmd, char **ps, char *str_end)
 {
-  struct cmd_s *cmd;
+  struct cmd_s *cmd = NULL;
   char *tok, *tok_end;
 
-  cmd = parseExecCmd(ps, str_end);
-  printf("input:%s\n", *ps);
-  if (!peek(ps, str_end, ">"))
+  while (peek(ps, str_end, ">"))
   {
-    int redir = getToken(ps, str_end, NULL, NULL);
-    printf("redir:%c\n",(char) redir);
-    if (getToken(ps, str_end, &tok, &tok_end) != '+')
+    char redir = (char)getToken(ps, str_end, NULL, NULL);
+    if (getToken(ps, str_end, &tok, &tok_end) != 'a')
     {
-      returnErr("No file for redirection");
-      return NULL;
+      printf("PANIK\n");
     }
     if (redir == '>')
     {
-      cmd = redirCmd(cmd, createTok(tok, tok_end));
+      cmd = redirCmd(arg_cmd, createTok(tok, tok_end));
+      break;
     }
+  }
+  if (cmd == NULL)
+  {
+    cmd = arg_cmd;
   }
   verifyCmd(cmd);
   return cmd;
@@ -149,6 +152,11 @@ int runCmd(struct cmd_s *cmd, struct path_s *path)
     }
     searchExecPath(path, cmd->cmd.exec->argv[0], cmd->cmd.exec->argv);
     break;
+  }
+  case REDIR:
+  {
+    printf("REDIRECT NOT IMPLEMENTED\n");
+    runCmd(cmd->cmd.redir->cmd, path);
   }
   default:
     returnErr("Default runCmd");
@@ -219,11 +227,16 @@ int verifyCmd(struct cmd_s *cmd)
   return 0;
 }
 
-void printCmd(struct cmd_s *cmd)
+void printCmd(struct cmd_s *cmd, char *l_padding)
 {
   if (verifyCmd(cmd) != 0)
   {
     returnErr("Invalid cmd passed to printCmd");
+    return;
+  }
+  if (l_padding == NULL)
+  {
+    returnErr("Null l_padding passed to printCmd");
     return;
   }
 
@@ -231,8 +244,8 @@ void printCmd(struct cmd_s *cmd)
   {
   case EXEC:
   {
-    printf("EXEC:\n");
-    printf("└Argv[");
+    printf("%sEXEC:\n", l_padding);
+    printf("%s└Argv[", l_padding);
     for (int i = 0; cmd->cmd.exec->argv[i] != 0; i++)
     {
       if (i == 0)
@@ -245,6 +258,13 @@ void printCmd(struct cmd_s *cmd)
       }
     }
     printf("]\n");
+    break;
+  }
+  case REDIR:
+  {
+    printf("%sREDIR:\n", l_padding);
+    printf("%s└File:%s\n", l_padding, cmd->cmd.redir->file_name);
+    printCmd(cmd->cmd.redir->cmd, " ");
     break;
   }
   default:
@@ -331,7 +351,7 @@ int printPath(struct path_s *path)
 }
 
 /*****************************Line functions*************************************/
-int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end_p)
+char getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end_p)
 {
   char *str = NULL;
   int ret = -1;
@@ -355,20 +375,24 @@ int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end
   case '\0':
     break;
   case '>':
-    //++str_end_p;
+  {
+    str++;
     if (*str == '>')
     {
       ret = '+';
       str++;
     }
     break;
+  }
   default:
+  {
     ret = 'a';
     while (str < str_end_p && strchr(WHITESPACE, *str) == NULL && strchr(SYMBOLS, *str) == NULL)
     {
       ++str;
     }
     break;
+  }
   }
 
   if (str_tok_end_p != NULL)
@@ -405,7 +429,9 @@ int peek(char **ps, char *es, char *toks)
   while (s < es && strchr(WHITESPACE, *s))
     s++;
   *ps = s;
-  return *s && strchr(toks, *s);
+
+  char *ret = strchr(toks, *s);
+  return *s && ret;
 }
 
 bool isempty(const char *s)
