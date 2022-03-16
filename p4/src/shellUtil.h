@@ -97,8 +97,19 @@ int removePath(struct path_s *path, char *remove);
 int printPath(struct path_s *path);
 
 // Line functions
-int getLine(FILE *stream, char *buff, int *len);
+/**
+ * @brief Get the Token object
+ * 
+ * @param str_p 
+ * @param str_end_p 
+ * @param str_cmd 
+ * @param str_cmd_args 
+ * @return int -1 = error, 0 = sucess, 1 = syntax error
+ */
 int getToken(char **str_p, char *str_end_p, char **str_cmd, char **str_cmd_args);
 char* createTok(char*str, char* str_end);
+int getLine(FILE *stream, char *buff, int *len);
+int peek(char **ps, char *es, char *toks);
+bool isempty(const char *s);
 
 #endif

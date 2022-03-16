@@ -1,14 +1,4 @@
 #include "shellUtil.h"
-int peek(char **ps, char *es, char *toks)
-{
-  char *s;
-
-  s = *ps;
-  while (s < es && strchr(WHITESPACE, *s))
-    s++;
-  *ps = s;
-  return *s && strchr(toks, *s);
-}
 int main(int argc, char *argv[])
 {
   struct path_s *path = initPath();
@@ -30,7 +20,7 @@ int main(int argc, char *argv[])
       printf("BREAK\n\n");
       break;
     }
-    if (tok != 'a')
+    if (tok != 1)
     {
       printf("syntax\n");
     }

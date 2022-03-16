@@ -260,7 +260,7 @@ int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end
   // }
   // else
   // {
-  ret = 'a';
+  ret = 1;
   while (str < str_end_p && strchr(WHITESPACE, *str) == NULL && strchr(SYMBOLS, *str) == NULL)
   {
     ++str;
@@ -305,6 +305,17 @@ int getLine(FILE *stream, char *buff, int *len)
   }
   *len = Len;
   return 0;
+}
+
+int peek(char **ps, char *es, char *toks)
+{
+  char *s;
+
+  s = *ps;
+  while (s < es && strchr(WHITESPACE, *s))
+    s++;
+  *ps = s;
+  return *s && strchr(toks, *s);
 }
 
 bool isempty(const char *s)
