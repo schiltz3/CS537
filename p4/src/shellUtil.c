@@ -91,19 +91,6 @@ int verifyCmd(struct cmd_s *cmd)
   return 0;
 }
 
-struct cmd_s *parseCmd(char *s)
-{
-  char *es;
-  struct cmd_s *cmd = NULL;
-
-  es = s + strlen(s);
-  printf("Len:%d\n", (int)strlen(s));
-  printf("s:%s\n", s);
-  printf("es:%s\n", es);
-
-  return cmd;
-}
-
  int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end_p)
 {
    char *str = NULL;
@@ -122,23 +109,23 @@ struct cmd_s *parseCmd(char *s)
    }
    // Set return to the current position of the str
    ret = *str;
-   if (*str == '>')
-   {
-     ++str_end_p;
-     if (*str == '>')
-     {
-       ret = '+';
-       str++;
-     }
-   }
-   else
-   {
+   // if (*str == '>')
+   // {
+   //   ++str_end_p;
+   //   if (*str == '>')
+   //   {
+   //     ret = '+';
+   //     str++;
+   //   }
+   // }
+   // else
+   // {
      ret = 'a';
      while (str < str_end_p && strchr(WHITESPACE, *str) == NULL && strchr(SYMBOLS, *str) == NULL)
      {
        ++str;
      }
-   }
+   //}
    if(str_tok_end_p != NULL){
      *str_tok_end_p = str;
    }
