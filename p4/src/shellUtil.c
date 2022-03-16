@@ -16,7 +16,7 @@ int returnPErr(char *failed_func)
 }
 
 /*****************************Command Functions**********************************/
-struct cmd_s *execCmd(struct path_s *path, char **argv)
+struct cmd_s *execCmd(char **argv)
 {
 
   struct cmd_s *cmd = malloc(sizeof(*cmd));
@@ -35,6 +35,41 @@ struct cmd_s *execCmd(struct path_s *path, char **argv)
     return NULL;
   }
   cmd->cmd.exec->argv = argv;
+
+  return cmd;
+}
+
+struct cmd_s *parseExecCmd(char **ps, char *str_end)
+{
+  char *str = *ps;
+  char *str_cmd;
+  char *str_cmd_end;
+
+  int tok;
+  char ret = ' ';
+  char *argv[100];
+  int argc = 0;
+
+  while (!peek(&str, str_end, "|&;"))
+  {
+    if ((tok = getToken(&str, str_end, &str_cmd, &str_cmd_end)) == 0)
+    {
+      break;
+    }
+    if (tok != 'a')
+    {
+      printf("syntax\n");
+    }
+    argv[argc] = createTok(str_cmd, str_cmd_end);
+    argc++;
+    if (argc >= 100)
+      printf("too many args\n");
+    // ret = parseredirs(ret, str, str_end);
+  }
+  argv[argc] = 0;
+
+  struct cmd_s *cmd = execCmd(argv);
+  verifyCmd(cmd);
 
   return cmd;
 }
@@ -59,6 +94,7 @@ int runCmd(struct cmd_s *cmd, struct path_s *path)
       return returnErr("Null argv pointer in cmd");
     }
     searchExecPath(path, cmd->cmd.exec->argv[0], cmd->cmd.exec->argv);
+    break;
   }
   default:
     returnErr("Default runCmd");
@@ -259,23 +295,29 @@ int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end
   }
   // Set return to the current position of the str
   ret = *str;
-  // if (*str == '>')
-  // {
-  //   ++str_end_p;
-  //   if (*str == '>')
-  //   {
-  //     ret = '+';
-  //     str++;
-  //   }
-  // }
-  // else
-  // {
-  ret = 1;
-  while (str < str_end_p && strchr(WHITESPACE, *str) == NULL && strchr(SYMBOLS, *str) == NULL)
+
+  switch (*str)
   {
-    ++str;
+  case '\0':
+    break;
+  case '>':
+    ++str_end_p;
+    if (*str == '>')
+    {
+      ret = '+';
+      str++;
+    }
+    break;
+  default:
+    ret = 'a';
+    while (str < str_end_p && strchr(WHITESPACE, *str) == NULL && strchr(SYMBOLS, *str) == NULL)
+    {
+      ++str;
+    }
+    break;
   }
-  //}
+
+
   if (str_tok_end_p != NULL)
   {
     *str_tok_end_p = str;
@@ -304,10 +346,10 @@ char *createTok(char *str, char *str_end)
 
 int getLine(FILE *stream, char *buff, int *len)
 {
-  if (stream == NULL || buff == NULL)
-  {
-    return returnErr("Null passed to getLine");
-  }
+  //if (stream == NULL || buff == NULL)
+  //{
+  //  return returnErr("Null passed to getLine");
+  //}
   size_t Len = 0;
   if (getline(&buff, &Len, stream) == -1)
   {

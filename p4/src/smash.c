@@ -4,41 +4,17 @@ int main(int argc, char *argv[])
   struct path_s *path = initPath();
   addPath(path, "/bin");
 
-  char *str = "ls -a; hi there";
-  char *str_end = str + strlen(str);
-  char *str_cmd;
-  char *str_cmd_end;
+  //char * test_input = "ls -a";
+  char* input_buff;
+  size_t input_buff_len;
 
-  int tok;
-  char ret = ' ';
-  char *argv1[100];
-  int argc1 = 0;
-  while (!peek(&str, str_end, "|&;"))
-  {
-    if ((tok = getToken(&str, str_end, &str_cmd, &str_cmd_end)) == 0)
-    {
-      printf("BREAK\n\n");
-      break;
-    }
-    if (tok != 1)
-    {
-      printf("syntax\n");
-    }
-    argv1[argc1] = createTok(str_cmd, str_cmd_end);
-    argc1++;
-    if (argc1 >= 100)
-      printf("too many args\n");
-    // ret = parseredirs(ret, str, str_end);
-  }
-  argv1[argc1] = 0;
-  for (int i = 0; argv1[i] != 0; i++)
-  {
-    printf("argv1[%d]:%s\n", i, argv1[i]);
-  }
+  getline(&input_buff, &input_buff_len, stdin);
 
-  struct cmd_s *cmd = execCmd(path, argv1);
+  char* test_input = input_buff;
+
+  struct cmd_s *cmd = parseExecCmd(&test_input, test_input + strlen(test_input));
   verifyCmd(cmd);
-  runCmd(cmd, path);
   printCmd(cmd);
+  runCmd(cmd, path);
   exit(EXIT_SUCCESS);
 }

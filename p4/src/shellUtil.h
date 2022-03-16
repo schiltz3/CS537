@@ -79,10 +79,17 @@ int returnErr(char *error_msg);
 int returnPErr(char *failed_func);
 
 // Init cmd functions
-struct cmd_s *execCmd(struct path_s *path, char **argv);
+struct cmd_s *execCmd(char **argv);
 struct cmd_s *redirCmd(struct cmd_s *cmd, char *file_name, FILE *fp, int stdio_backup, int stderr_backup);
 struct cmd_s *listCmd(struct cmd_s *left, struct cmd_s *right);
 struct cmd_s *parallelCmd(struct cmd_s *left, struct cmd_s *right);
+
+// Parse cmd functions
+struct cmd_s *parseCmd(char*s);
+struct cmd_s *parseExecCmd(char**, char*);
+struct cmd_s *parseRedirCmd(char**, char*);
+struct cmd_s *parseListCmd(char**, char*);
+struct cmd_s *parseParallelCmd(char**, char*);
 
 // Cmd utils
 int runCmd(struct cmd_s *cmd, struct path_s *path);
