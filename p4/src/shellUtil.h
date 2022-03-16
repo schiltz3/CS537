@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <ctype.h>
+#include <unistd.h>
 
 #define STARTING_TOK_BUFSIZE 64
 #define TOKEN_DELIMINATORS " \t\n\r"
@@ -18,7 +19,7 @@
 
 struct path_s
 {
-  char **path;
+  char **paths;
   int len;
   int size;
 };
@@ -84,10 +85,10 @@ struct cmd_s *listCmd(struct cmd_s *left, struct cmd_s *right);
 struct cmd_s *paralellCmd(struct cmd_s *left, struct cmd_s *right);
 
 // Cmd utils
+int runCmd(struct cmd_s *cmd, struct path_s *path);
+int searchExecPath(struct path_s *path, char* cmd, char **argv);
 int verifyCmd(struct cmd_s *cmd);
 void printCmd(struct cmd_s *cmd);
-struct cmd_s *parseCmd(char *s);
-int getToken(char **str_p, char *str_end_p, char **str_cmd, char **str_cmd_args);
 
 // Path functions
 struct path_s *initPath();
@@ -95,7 +96,9 @@ int addPath(struct path_s *path, char *add);
 int removePath(struct path_s *path, char *remove);
 int printPath(struct path_s *path);
 
+// Line functions
 int getLine(FILE *stream, char *buff, int *len);
+int getToken(char **str_p, char *str_end_p, char **str_cmd, char **str_cmd_args);
 char* createTok(char*str, char* str_end);
 
 #endif

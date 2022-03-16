@@ -39,6 +39,86 @@ struct cmd_s *execCmd(struct path_s *path, char **argv)
   return cmd;
 }
 
+int runCmd(struct cmd_s *cmd, struct path_s *path)
+{
+  if(cmd == NULL){
+    return returnErr("Null cmd pointer passed to runCmd");
+  }
+
+  switch(cmd->type){
+    case EXEC:{
+      if(cmd->cmd.exec == NULL){
+        return returnErr("Null exec pointer in cmd");
+      }
+      if(cmd->cmd.exec->argv == NULL){
+        return returnErr("Null argv pointer in cmd");
+      }
+      searchExecPath(path, cmd->cmd.exec->argv[0], cmd->cmd.exec->argv);
+
+
+
+    }
+    default:
+      returnErr("Default runCmd");
+  }
+
+  return -1;
+}
+
+int searchExecPath(struct path_s *path, char* cmd, char **argv){
+  bool found = false;
+  for(int i = 0; i < path->len; i++){
+    // Create path to try to execute at
+    char* lookup_path = malloc(strlen(path->paths[i]) + strlen(cmd));
+    if(lookup_path == NULL){
+      return returnPErr("Malloc");
+    }
+    sprintf(lookup_path, "%s/%s", path->paths[i], cmd);
+
+    // Check if file is available 
+    if(access(lookup_path, F_OK) == 0){
+      printf("Run:%s\n", lookup_path);
+      found = true;
+
+      // Run the exe
+      if(execv(lookup_path, argv) == -1){
+        free(lookup_path);
+        return returnPErr("Execv");
+      }
+      free(lookup_path);
+      break;
+    }
+    else{
+      return returnErr("Access Denied");
+    }
+    free(lookup_path);
+  }
+  if(found == false){
+    printf("Failed to find program in path");
+  }
+
+  return 0;
+}
+
+int verifyCmd(struct cmd_s *cmd)
+{
+  if (cmd == NULL)
+  {
+    return returnErr("Null Cmd Ptr");
+  }
+
+  switch (cmd->type)
+  {
+  case UNINIT:
+    fprintf(stderr, RED "Uninitialized Cmd Type\n" NC);
+    return 1;
+  default:
+    break;
+  }
+
+  return 0;
+}
+
 void printCmd(struct cmd_s *cmd)
 {
   if (verifyCmd(cmd) != 0)
@@ -72,75 +152,11 @@ void printCmd(struct cmd_s *cmd)
   }
 }
 
-int verifyCmd(struct cmd_s *cmd)
-{
-  if (cmd == NULL)
-  {
-    return returnErr("Null Cmd Ptr");
-  }
-
-  switch (cmd->type)
-  {
-  case UNINIT:
-    fprintf(stderr, RED "Uninitialized Cmd Type\n" NC);
-    return 1;
-  default:
-    break;
-  }
-
-  return 0;
-}
-
- int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end_p)
-{
-   char *str = NULL;
-   int ret = -1;
-
-   str = *str_p;
-   // scan string pointer over whitespace
-   while (str < str_end_p && strchr(WHITESPACE, *str) != NULL)
-   {
-     str++;
-   }
-   // Set the command
-   if (str_tok_p != NULL)
-   {
-     *str_tok_p = str;
-   }
-   // Set return to the current position of the str
-   ret = *str;
-   // if (*str == '>')
-   // {
-   //   ++str_end_p;
-   //   if (*str == '>')
-   //   {
-   //     ret = '+';
-   //     str++;
-   //   }
-   // }
-   // else
-   // {
-     ret = 'a';
-     while (str < str_end_p && strchr(WHITESPACE, *str) == NULL && strchr(SYMBOLS, *str) == NULL)
-     {
-       ++str;
-     }
-   //}
-   if(str_tok_end_p != NULL){
-     *str_tok_end_p = str;
-   }
-   while(str < str_end_p && strchr(WHITESPACE, *str) != NULL){
-     str++;
-   }
-   *str_p = str;
-   return ret;
- }
-
 /*****************************Path Functions*************************************/
 struct path_s *initPath()
 {
   struct path_s *path = malloc(sizeof(*path));
-  path->path = NULL;
+  path->paths = NULL;
   path->len = 0;
   path->size = 0;
   return path;
@@ -155,8 +171,8 @@ int addPath(struct path_s *path, char *add)
 
   path->size = path->size + strlen(add);
 
-  path->path = realloc(path->path, path->size);
-  if (path->path == NULL)
+  path->paths = realloc(path->paths, path->size);
+  if (path->paths == NULL)
   {
     return returnPErr("realloc");
   }
@@ -165,10 +181,10 @@ int addPath(struct path_s *path, char *add)
 
   for (int i = path->len - 1; i > 0; i--)
   {
-    path->path[i] = path->path[i - 1];
+    path->paths[i] = path->paths[i - 1];
   }
 
-  path->path[0] = add;
+  path->paths[0] = add;
 
   return 0;
 }
@@ -184,13 +200,13 @@ int removePath(struct path_s *path, char *remove)
 
   for (int i = 0; i < path->len; i++)
   {
-    if ((found = strcmp(path->path[i], remove)) == 0)
+    if ((found = strcmp(path->paths[i], remove)) == 0)
     {
       for (int j = i; i < path->len - 1; i++)
       {
-        path->path[j] = path->path[j + 1];
+        path->paths[j] = path->paths[j + 1];
       }
-      path->path[path->len - 1] = NULL;
+      path->paths[path->len - 1] = NULL;
       --path->len;
       break;
     }
@@ -209,12 +225,59 @@ int printPath(struct path_s *path)
   printf("path:\n");
   for (int i = 0; i < path->len; i++)
   {
-    printf("%s\n", path->path[i]);
+    printf("%s\n", path->paths[i]);
   }
   return 0;
 }
 
 /*****************************Line functions*************************************/
+int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end_p)
+{
+  char *str = NULL;
+  int ret = -1;
+
+  str = *str_p;
+  // scan string pointer over whitespace
+  while (str < str_end_p && strchr(WHITESPACE, *str) != NULL)
+  {
+    str++;
+  }
+  // Set the command
+  if (str_tok_p != NULL)
+  {
+    *str_tok_p = str;
+  }
+  // Set return to the current position of the str
+  ret = *str;
+  // if (*str == '>')
+  // {
+  //   ++str_end_p;
+  //   if (*str == '>')
+  //   {
+  //     ret = '+';
+  //     str++;
+  //   }
+  // }
+  // else
+  // {
+  ret = 'a';
+  while (str < str_end_p && strchr(WHITESPACE, *str) == NULL && strchr(SYMBOLS, *str) == NULL)
+  {
+    ++str;
+  }
+  //}
+  if (str_tok_end_p != NULL)
+  {
+    *str_tok_end_p = str;
+  }
+  while (str < str_end_p && strchr(WHITESPACE, *str) != NULL)
+  {
+    str++;
+  }
+  *str_p = str;
+  return ret;
+}
+
 char *createTok(char *str, char *str_end)
 {
   int len = str_end - str;
