@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 
   struct cmd_s *cmd = execCmd(path, argv1);
   verifyCmd(cmd);
+  runCmd(cmd, path);
   printCmd(cmd);
   exit(EXIT_SUCCESS);
 }

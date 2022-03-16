@@ -30,7 +30,7 @@ enum cmd_t
   EXEC,
   REDIR,
   LIST,
-  PARALELL,
+  PARALLEL,
 };
 
 struct exec_cmd_s
@@ -54,7 +54,7 @@ struct list_cmd_s
   struct cmd_s *right;
 };
 
-struct paralell_cmd_s
+struct parallel_cmd_s
 {
   struct cmd_s *left;
   struct cmd_s *right;
@@ -65,7 +65,7 @@ union cmd_u
   struct exec_cmd_s *exec;
   struct redir_cmd_s *redir;
   struct list_cmd_s *list;
-  struct paralell_cmd_s *paralell;
+  struct parallel_cmd_s *parallel;
 };
 
 struct cmd_s
@@ -82,11 +82,11 @@ int returnPErr(char *failed_func);
 struct cmd_s *execCmd(struct path_s *path, char **argv);
 struct cmd_s *redirCmd(struct cmd_s *cmd, char *file_name, FILE *fp, int stdio_backup, int stderr_backup);
 struct cmd_s *listCmd(struct cmd_s *left, struct cmd_s *right);
-struct cmd_s *paralellCmd(struct cmd_s *left, struct cmd_s *right);
+struct cmd_s *parallelCmd(struct cmd_s *left, struct cmd_s *right);
 
 // Cmd utils
 int runCmd(struct cmd_s *cmd, struct path_s *path);
-int searchExecPath(struct path_s *path, char* cmd, char **argv);
+int searchExecPath(struct path_s *path, char *cmd, char **argv);
 int verifyCmd(struct cmd_s *cmd);
 void printCmd(struct cmd_s *cmd);
 
@@ -99,15 +99,15 @@ int printPath(struct path_s *path);
 // Line functions
 /**
  * @brief Get the Token object
- * 
- * @param str_p 
- * @param str_end_p 
- * @param str_cmd 
- * @param str_cmd_args 
- * @return int -1 = error, 0 = sucess, 1 = syntax error
+ *
+ * @param str_p
+ * @param str_end_p
+ * @param str_cmd
+ * @param str_cmd_args
+ * @return int -1 = error, 0 = success, 1 = syntax error
  */
 int getToken(char **str_p, char *str_end_p, char **str_cmd, char **str_cmd_args);
-char* createTok(char*str, char* str_end);
+char *createTok(char *str, char *str_end);
 int getLine(FILE *stream, char *buff, int *len);
 int peek(char **ps, char *es, char *toks);
 bool isempty(const char *s);

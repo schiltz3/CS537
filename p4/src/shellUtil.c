@@ -41,59 +41,69 @@ struct cmd_s *execCmd(struct path_s *path, char **argv)
 
 int runCmd(struct cmd_s *cmd, struct path_s *path)
 {
-  if(cmd == NULL){
+  if (cmd == NULL)
+  {
     return returnErr("Null cmd pointer passed to runCmd");
   }
 
-  switch(cmd->type){
-    case EXEC:{
-      if(cmd->cmd.exec == NULL){
-        return returnErr("Null exec pointer in cmd");
-      }
-      if(cmd->cmd.exec->argv == NULL){
-        return returnErr("Null argv pointer in cmd");
-      }
-      searchExecPath(path, cmd->cmd.exec->argv[0], cmd->cmd.exec->argv);
-
-
-
+  switch (cmd->type)
+  {
+  case EXEC:
+  {
+    if (cmd->cmd.exec == NULL)
+    {
+      return returnErr("Null exec pointer in cmd");
     }
-    default:
-      returnErr("Default runCmd");
+    if (cmd->cmd.exec->argv == NULL)
+    {
+      return returnErr("Null argv pointer in cmd");
+    }
+    searchExecPath(path, cmd->cmd.exec->argv[0], cmd->cmd.exec->argv);
+  }
+  default:
+    returnErr("Default runCmd");
   }
 
   return -1;
 }
 
-int searchExecPath(struct path_s *path, char* cmd, char **argv){
+int searchExecPath(struct path_s *path, char *cmd, char **argv)
+{
   bool found = false;
-  for(int i = 0; i < path->len; i++){
+  for (int i = 0; i < path->len; i++)
+  {
     // Create path to try to execute at
-    char* lookup_path = malloc(strlen(path->paths[i]) + strlen(cmd));
-    if(lookup_path == NULL){
+    char *lookup_path = malloc(strlen(path->paths[i]) + strlen(cmd));
+    if (lookup_path == NULL)
+    {
       return returnPErr("Malloc");
     }
     sprintf(lookup_path, "%s/%s", path->paths[i], cmd);
 
-    // Check if file is available 
-    if(access(lookup_path, F_OK) == 0){
+    // Check if file is available
+    if (access(lookup_path, F_OK) == 0)
+    {
       printf("Run:%s\n", lookup_path);
       found = true;
 
       // Run the exe
-      if(execv(lookup_path, argv) == -1){
+      if (execv(lookup_path, argv) == -1)
+      {
         free(lookup_path);
         return returnPErr("Execv");
       }
       free(lookup_path);
       break;
     }
-    else{
+    else
+    {
+      free(lookup_path);
       return returnErr("Access Denied");
     }
     free(lookup_path);
   }
-  if(found == false){
+  if (found == false)
+  {
     printf("Failed to find program in path");
   }
 
