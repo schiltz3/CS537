@@ -43,9 +43,9 @@ struct redir_cmd_s
 {
   struct cmd_s *cmd;
   char *file_name;
-  FILE *fp;
-  int stdio_backup;
-  int stderr_backup;
+  //FILE *fp;
+  //int stdio_backup;
+  //int stderr_backup;
 };
 
 struct list_cmd_s
@@ -80,7 +80,7 @@ int returnPErr(char *failed_func);
 
 // Init cmd functions
 struct cmd_s *execCmd(char **argv);
-struct cmd_s *redirCmd(struct cmd_s *cmd, char *file_name, FILE *fp, int stdio_backup, int stderr_backup);
+struct cmd_s *redirCmd(struct cmd_s *cmd, char *file_name);
 struct cmd_s *listCmd(struct cmd_s *left, struct cmd_s *right);
 struct cmd_s *parallelCmd(struct cmd_s *left, struct cmd_s *right);
 

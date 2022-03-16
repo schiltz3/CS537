@@ -39,6 +39,35 @@ struct cmd_s *execCmd(char **argv)
   return cmd;
 }
 
+struct cmd_s *redirCmd(struct cmd_s *arg_cmd, char *file_name)
+{
+  if (arg_cmd == NULL)
+  {
+    returnErr("Null cmd passed to redirCmd");
+    return NULL;
+  }
+
+  struct cmd_s *cmd = malloc(sizeof(*cmd));
+
+  if (cmd == NULL)
+  {
+    returnPErr("Malloc");
+    return NULL;
+  }
+  cmd->type = REDIR;
+  cmd->cmd.redir = (struct redir_cmd_s*)malloc(sizeof(struct redir_cmd_s));
+  if(cmd->cmd.exec == NULL){
+    returnPErr("Malloc");
+    free(cmd);
+    return NULL;
+  }
+
+  cmd->cmd.redir->cmd = arg_cmd;
+  cmd->cmd.redir->file_name = file_name;
+
+  return cmd;
+}
+
 struct cmd_s *parseExecCmd(char **ps, char *str_end)
 {
   char *str = *ps;
@@ -49,6 +78,7 @@ struct cmd_s *parseExecCmd(char **ps, char *str_end)
   char ret = ' ';
   char *argv[100];
   int argc = 0;
+  struct cmd_s *cmd;
 
   while (!peek(&str, str_end, "|&;"))
   {
@@ -68,9 +98,32 @@ struct cmd_s *parseExecCmd(char **ps, char *str_end)
   }
   argv[argc] = 0;
 
-  struct cmd_s *cmd = execCmd(argv);
+  cmd = execCmd(argv);
   verifyCmd(cmd);
 
+  return cmd;
+}
+
+struct cmd_s *parseRedirCmd(char **ps, char *str_end)
+{
+  struct cmd_s *cmd;
+  char *tok, *tok_end;
+
+  cmd = parseExecCmd(ps, str_end);
+  if (peek(ps, str_end, ">"))
+  {
+    int redir = gettoken(ps, str_end, NULL, NULL);
+    if (gettoken(ps, str_end, tok, tok_end) != 'a')
+    {
+      returnErr("No file for redirection");
+      return NULL;
+    }
+    if (redir == '>')
+    {
+      cmd = redirCmd(cmd, createTok(tok, tok_end));
+    }
+  }
+  verifyCmd(cmd);
   return cmd;
 }
 
@@ -316,7 +369,6 @@ int getToken(char **str_p, char *str_end_p, char **str_tok_p, char **str_tok_end
     }
     break;
   }
-
 
   if (str_tok_end_p != NULL)
   {
