@@ -1,22 +1,95 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <errno.h>
+
 #include "shellUtil.h"
+
+lines_s path = {NULL, 0, 0};
+
 int main(int argc, char *argv[])
 {
-  struct path_s *path = initPath();
-  addPath(path, "/bin");
+	// Do not start program
+	if (argc > 2 || argc < 1)
+	{
+		printf("Too many arguments\n");
+		exit(EXIT_FAILURE);
+	}
 
-  // char * test_input = "ls -a";
-  char *input_buff;
-  size_t input_buff_len;
+	FILE *input = NULL;
 
-  // getline(&input_buff, &input_buff_len, stdin);
+	// Read from stdin
+	if (argc == 1)
+	{
+		input = stdin;
+	}
+	// Read from input file
+	else if (argc == 2)
+	{
+		//printf("File to read from: %s\n\n", argv[1]);
+		input = fopen(argv[1], "r");
+	}
 
-  char *test_input = "ls -a > c.txt";
-  //char *test_input = "ls -a";
+	// verify input has been selected and properly opened
+	if (input == NULL)
+	{
+		perror("fopen");
+		exit(EXIT_FAILURE);
+	}
 
-  struct cmd_s *cmd = parseExecCmd(&test_input, test_input + strlen(test_input));
-  // struct cmd_s *cmd = parseRedirCmd(&test_input, test_input + strlen(test_input));
-  verifyCmd(cmd);
-  printCmd(cmd, "");
-  runCmd(cmd, path);
-  exit(EXIT_SUCCESS);
+	addToPath(&path, "/bin");
+
+	// Continue executing commands untill the flile is closed, EOF is reached, or the quit
+	// command has been executed
+	while (true)
+	{
+		if (input == stdin)
+		{
+			printf("smash>");
+		}
+
+		// read lines from the input
+		lines_s *lines = smashReadLine(input);
+
+		// Loop over Lines
+		for (int i = 0; i < lines->len; i++)
+		{
+
+			// Ignore empty line
+			if (isempty(lines->lines[i]))
+			{
+				continue;
+			}
+
+			// Split Line up into tokens seperated by whitespace
+			lines_s *tokens = smashSplitLine(lines->lines[i], TOKEN_DELIMINATORS);
+
+			// Execute any shell commands
+			int ret = smashCommand(tokens, &path);
+			if (ret == 1)
+			{
+				continue;
+			}
+			else if (ret == -1)
+			{
+				//fprintf(stderr, RED "smashCommand Error" NC);
+				exit(EXIT_FAILURE);
+			}
+
+			redirect(tokens, &path);
+			// execute any system commands
+			// smashLaunch(tokens, &path);
+
+		}
+		if (input == stdin)
+		{
+			printf("\n");
+		}
+	}
+
+	// Close input
+	fclose(input);
+
+	return (0);
 }
