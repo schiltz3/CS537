@@ -10,7 +10,8 @@ int main(int argc, char *argv[])
 
   // getline(&input_buff, &input_buff_len, stdin);
 
-  char *test_input = "ls -a > c";
+  char *test_input = "ls -a > c.txt";
+  //char *test_input = "ls -a";
 
   struct cmd_s *cmd = parseExecCmd(&test_input, test_input + strlen(test_input));
   // struct cmd_s *cmd = parseRedirCmd(&test_input, test_input + strlen(test_input));

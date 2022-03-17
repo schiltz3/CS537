@@ -75,7 +75,7 @@ struct cmd_s *parseExecCmd(char **ps, char *str_end)
   char *str_cmd_end;
 
   int tok;
-  char *argv[100];
+  char *argv[MAX_ARGS];
   int argc = 0;
   struct cmd_s *cmd = execCmd(argv);
 
@@ -91,14 +91,17 @@ struct cmd_s *parseExecCmd(char **ps, char *str_end)
     }
     argv[argc] = createTok(str_cmd, str_cmd_end);
     argc++;
-    if (argc >= 100)
+    if (argc >= MAX_ARGS)
     {
       printf("too many args\n");
     }
     cmd = parseRedirCmd(cmd, ps, str_end);
     // printf("Str:%s\n", *ps);
   }
-  argv[argc] = 0;
+  for (int i = argc; i < MAX_ARGS; i++)
+  {
+    argv[i] = NULL;
+  }
 
   verifyCmd(cmd);
 
@@ -150,55 +153,142 @@ int runCmd(struct cmd_s *cmd, struct path_s *path)
     {
       return returnErr("Null argv pointer in cmd");
     }
-    searchExecPath(path, cmd->cmd.exec->argv[0], cmd->cmd.exec->argv);
+    printCmd(cmd, "");
+
+    searchExecPath(path, &cmd->cmd.exec->argv[0], cmd->cmd.exec->argv);
+    // pid_t pid;
+    // pid_t wpid;
+    // int status;
+    // pid = fork();
+    // // Child
+    // if (pid == 0)
+    // {
+
+    //   // Failed fork
+    // }
+    // else if (pid < 0)
+    // {
+    //   perror("fork");
+    //   exit(EXIT_FAILURE);
+    // }
+    // // Child
+    // else
+    // {
+    //   do
+    //   {
+    //     wpid = waitpid(pid, &status, WUNTRACED);
+    //     if (wpid == -1)
+    //     {
+    //       perror("waitpid");
+    //       exit(EXIT_FAILURE);
+    //     }
+    //   } while (WIFEXITED(status) == false && WIFSIGNALED(status) == false);
+    // }
+
     break;
   }
   case REDIR:
   {
-    printf("REDIRECT NOT IMPLEMENTED\n");
+    int new = open(cmd->cmd.redir->file_name, O_RDWR | O_CREAT | O_TRUNC, 0600);
+    if (new < 0)
+    {
+      return returnErr("Can't open file");
+    }
+
+    fflush(stdout);
+    fflush(stderr);
+
+    int stdout_backup = dup(fileno(stdout));
+    int stderr_backup = dup(fileno(stderr));
+
+    if (dup2(new, fileno(stdout)) == -1)
+    {
+      return returnPErr("Cannot redirect stdout");
+    }
+    if (dup2(new, fileno(stderr)) == -1)
+    {
+      return returnPErr("Cannot redirect stderr");
+    }
+    close(new);
     runCmd(cmd->cmd.redir->cmd, path);
+
+    fflush(stdout);
+    fflush(stderr);
+
+    dup2(stdout_backup, fileno(stdout));
+    dup2(stderr_backup, fileno(stderr));
+
+    close(stdout_backup);
+    close(stderr_backup);
+    printf("redirected stdout\n");
+    break;
   }
   default:
     returnErr("Default runCmd");
   }
 
-  return -1;
+  return 0;
 }
 
-int searchExecPath(struct path_s *path, char *cmd, char **argv)
+int searchExecPath(struct path_s *path, char **cmd_p, char **argv)
 {
+  if (cmd_p == NULL)
+  {
+    return returnErr("Null cmd_p");
+  }
+  if (path == NULL)
+  {
+    return returnErr("Null path");
+  }
+  char *cmd = *cmd_p;
+  if(cmd == NULL){
+    return returnErr("Null cmd");
+  }
+  int cmd_len = strlen(cmd);
+
   bool found = false;
   for (int i = 0; i < path->len; i++)
   {
     // Create path to try to execute at
-    char *lookup_path = malloc(strlen(path->paths[i]) + strlen(cmd));
+    int path_len = strlen(path->paths[i]);
+    char *lookup_path = (char *)malloc(cmd_len + path_len + 1);
     if (lookup_path == NULL)
     {
       return returnPErr("Malloc");
     }
-    sprintf(lookup_path, "%s/%s", path->paths[i], cmd);
+
+    // Create lookup str
+    for (int j = 0; j < path_len; j++)
+    {
+      lookup_path[j] = path->paths[i][j];
+    }
+    lookup_path[path_len] = '/';
+    for (int j = 0; j < cmd_len; j++)
+    {
+      lookup_path[j + path_len + 1] = cmd[j];
+    }
 
     // Check if file is available
     if (access(lookup_path, F_OK) == 0)
     {
-      printf("Run:%s\n", lookup_path);
+      // printf("Run:%s\n", lookup_path);
       found = true;
 
       // Run the exe
       if (execv(lookup_path, argv) == -1)
       {
-        free(lookup_path);
+        // free(lookup_path);
         return returnPErr("Execv");
       }
-      free(lookup_path);
+      // free(lookup_path);
       break;
     }
     else
     {
-      free(lookup_path);
+      // free(lookup_path);
       return returnErr("Access Denied");
     }
-    free(lookup_path);
+    // free(lookup_path);
   }
   if (found == false)
   {

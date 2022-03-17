@@ -9,10 +9,17 @@
 #include <ctype.h>
 #include <unistd.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/wait.h>
+
 #define STARTING_TOK_BUFSIZE 64
 #define TOKEN_DELIMINATORS " \t\n\r"
 #define WHITESPACE " \t\r\n\v"
 #define SYMBOLS ">&;"
+
+#define MAX_ARGS 100
 
 #define RED "\x1B[0;31m"
 #define NC "\x1B[0m"
@@ -94,7 +101,7 @@ struct cmd_s *parseParallelCmd(char **, char *);
 
 // Cmd utils
 int runCmd(struct cmd_s *cmd, struct path_s *path);
-int searchExecPath(struct path_s *path, char *cmd, char **argv);
+int searchExecPath(struct path_s *path, char **cmd, char **argv);
 int verifyCmd(struct cmd_s *cmd);
 void printCmd(struct cmd_s *cmd, char *l_padding);
 
