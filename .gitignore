@@ -66,3 +66,7 @@ p3a/p3a/output/
 *.zip
 
 p4/.vscode/
+
+p4/output/
+
+p4/c.txt

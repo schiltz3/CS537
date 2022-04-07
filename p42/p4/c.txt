@@ -1,0 +1,13 @@
+EXEC:
+└Argv[ls,-a]
+.
+..
+c.txt
+include
+lib
+Makefile
+old
+output
+src
+testfile.txt
+.vscode
